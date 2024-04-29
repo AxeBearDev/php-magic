@@ -3,14 +3,21 @@
 ```php
 class User
 {
-  use Magic;
   use Transforms;
 
   #[Transform(onSet: ['ucfirst'])]
-  public string $name;
+  protected string $name;
+
+  #[Transform(onGet: ['strtolower'])]
+  protected string $email;
 }
 
 $user = new User();
-$user->name = 'john';
-echo $user->name; // John
+$user->name = 'galadriel';
+echo $user->name; // Galadriel
+echo $user->getRaw('name') // Galadriel
+
+$user->email = 'GALADRIEL@example.com';
+echo $user->email; // galadriel@example.com
+echo $user->getRaw('email') // GALADRIEL@example.com
 ```

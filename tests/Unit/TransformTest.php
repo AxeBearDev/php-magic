@@ -36,6 +36,24 @@ describe('transform', function () {
         expect($user->getRaw('firstName'))->toBe(' j ');
     });
 
+    test('onSet and onGet', function () {
+        /**
+         * @property object $data
+         */
+        class OnSetAndGetUser
+        {
+            use Transforms;
+
+            #[Transform(onSet: ['json_encode'], onGet: ['json_decode'])]
+            protected $data;
+        }
+
+        $user = new OnSetAndGetUser();
+        $user->data = ['name' => 'j'];
+        expect($user->data->name)->toBe('j');
+        expect($user->getRaw('data'))->toBe('{"name":"j"}');
+    });
+
     test('exception for public properties', function () {
         $this->expectExceptionMessage('Properties with transforms must be protected or private.');
         $this->expectException(\AxeBear\Magic\MagicException::class);
