@@ -38,7 +38,7 @@ trait Transforms
         if ($transform->onGet) {
             $this->onGet($propertyName, function (MagicEvent $event) use ($property, $transform) {
                 $value = $property->getValue($this);
-                $event->output(Transform::apply($value, $transform->onGet));
+                $event->output($transform->apply($this, $value, $transform->onGet));
             });
         }
 
@@ -52,7 +52,7 @@ trait Transforms
         if ($transform->onSet) {
             // Add __set handlers if provided
             $this->onSet($propertyName, function (MagicEvent $event) use ($property, $transform) {
-                $value = Transform::apply($event->input, $transform->onSet);
+                $value = $transform->apply($this, $event->input, $transform->onSet);
                 $property->setValue($this, $value);
                 $event->output($value);
             });

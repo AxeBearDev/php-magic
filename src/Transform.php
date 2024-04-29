@@ -24,11 +24,15 @@ class Transform
      *
      * @param  array<callable(mixed): mixed>  $transformers
      */
-    public static function apply(mixed $value, array $transformers): mixed
+    public function apply(object $instance, mixed $value, array $transformers): mixed
     {
         foreach ($transformers as $transformer) {
+            // Prefer instance methods
+            if (is_string($transformer) && method_exists($instance, $transformer)) {
+                $transformer = [$instance, $transformer];
+            }
             if (! is_callable($transformer)) {
-                throw new \InvalidArgumentException('Each provided transformer must be callable.');
+                throw new MagicException('Transformers must be callable.');
             }
             $value = call_user_func($transformer, $value);
         }
