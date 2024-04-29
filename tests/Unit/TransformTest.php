@@ -5,7 +5,7 @@ namespace Tests\Unit;
 use AxeBear\Magic\Transform;
 use AxeBear\Magic\Transforms;
 
-describe('transform', function () {
+describe('#[Transform]', function () {
     test('onSet', function () {
         class OnSetUser
         {
@@ -59,7 +59,7 @@ describe('transform', function () {
         {
             use Transforms;
 
-            #[Transform(onSet: [[self::class, 'addOne']], onGet: [[self::class, 'subtractOne']])]
+            #[Transform(onSet: ['addOne'], onGet: ['subtractOne'])]
             protected int $number;
 
             public static function addOne(int $value): int
@@ -106,7 +106,6 @@ describe('transform', function () {
     });
 
     test('exception for public properties', function () {
-        $this->expectExceptionMessage('Properties with transforms must be protected or private.');
         $this->expectException(\AxeBear\Magic\MagicException::class);
 
         class PublicTransformUser

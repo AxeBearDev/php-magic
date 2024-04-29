@@ -2,7 +2,6 @@
 
 namespace AxeBear\Magic;
 
-use ReflectionClass;
 use ReflectionProperty;
 
 trait Transforms
@@ -16,7 +15,7 @@ trait Transforms
 
     protected function bootTransforms(): void
     {
-        $transforms = $this->getTransforms();
+        $transforms = $this->getMagicProperties(Transform::class);
         foreach ($transforms as [$property, $attributes]) {
             foreach ($attributes as $attribute) {
                 $transform = $attribute->newInstance();
@@ -63,20 +62,5 @@ trait Transforms
                 $event->output($event->input);
             });
         }
-    }
-
-    public function getTransforms(): array
-    {
-        $reflection = new ReflectionClass($this);
-        $transforms = [];
-
-        foreach ($reflection->getProperties() as $property) {
-            $attributes = $property->getAttributes(Transform::class);
-            if (count($attributes) > 0) {
-                $transforms[] = [$property, $attributes];
-            }
-        }
-
-        return $transforms;
     }
 }

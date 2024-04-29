@@ -1,6 +1,6 @@
 {
-  "name": "axebear/magic",
-  "description": "PHP micro framework",
+  "name": "axebear/php-magic",
+  "description": "PHP micro framework for hooking into magic methods with attributes.",
   "type": "library",
   "version": "0.1.0",
   "autoload": {

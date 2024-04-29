@@ -1,5 +1,9 @@
 # Magic
 
+## Transforms
+
+Combine the `#[Transform]` attribute and the `Transforms` trait to apply changes to class properties when they are set or retrieved.
+
 ```php
 class User
 {
