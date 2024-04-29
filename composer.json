@@ -1,0 +1,31 @@
+{
+  "name": "axebear/magic",
+  "description": "PHP micro framework",
+  "type": "library",
+  "version": "0.1.0",
+  "autoload": {
+    "psr-4": {
+      "AxeBear\\Magic\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Alex Barrett",
+      "email": "alex@axebear.dev"
+    }
+  ],
+  "require-dev": {
+    "pestphp/pest": "^2.34",
+    "psy/psysh": "@stable",
+    "phpstan/phpstan": "^1.10"
+  },
+  "scripts": {
+    "test": "vendor/bin/pest",
+    "cli": "vendor/bin/psysh"
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  }
+}
