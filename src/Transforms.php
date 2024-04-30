@@ -15,13 +15,10 @@ trait Transforms
 
     protected function bootTransforms(): void
     {
-        $transforms = $this->getMagicProperties(Transform::class);
-        foreach ($transforms as [$property, $attributes]) {
-            foreach ($attributes as $attribute) {
-                $transform = $attribute->newInstance();
-                $this->registerTransform($property, $transform);
-            }
-        }
+        $this->eachMagicProperty(
+            Transform::class,
+            fn (ReflectionProperty $property, Transform $transform) => $this->registerTransform($property, $transform)
+        );
     }
 
     protected function registerTransform(ReflectionProperty $property, Transform $transform): void

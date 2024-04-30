@@ -108,6 +108,24 @@ trait Magic
         throw new MagicException('No '.$event->type.' handler found for '.static::class.'::'.$event->name);
     }
 
+    public function eachMagicMethod(string $attributeName, Closure $callback): void
+    {
+        foreach ($this->getMagicMethods($attributeName) as [$method, $attributes]) {
+            foreach ($attributes as $attribute) {
+                $callback($method, $attribute->newInstance());
+            }
+        }
+    }
+
+    public function eachMagicProperty(string $attributeName, Closure $callback): void
+    {
+        foreach ($this->getMagicProperties($attributeName) as [$property, $attributes]) {
+            foreach ($attributes as $attribute) {
+                $callback($property, $attribute->newInstance());
+            }
+        }
+    }
+
     /**
      * Gets the methods that have the specified attribute
      *

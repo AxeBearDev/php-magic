@@ -8,19 +8,22 @@ This PHP package uses magic methods to provide a composable way to add functiona
 composer require spleenboy/php-magic
 ```
 
+## Scripts
+  
+- `composer test`: Test with Pest
+- `composer cli`: Open a Pysch shell with the package loaded
+
 ## Attributes
 
 ### Transform
 
 The `#[Transform]` attribute and the `Transforms` trait work together to apply changes to class properties when they are set or retrieved.
 
-Let's start with a comprehensive example:
-
 ```php
 class Model {
   use Transforms;
 
-  #[Transform(onSet: ['ucfirst'])]
+  #[Transform(onSet: ['ucfirst', 'trim'])]
   protected string $name;
 
   #[Transform(onGet: ['strtolower'])]
@@ -39,15 +42,36 @@ class Model {
 }
 
 $model = new Model();
-$model->name = 'galadriel';
-echo $model->name; // Galadriel
-echo $model->getRaw('name') // galadriel
+$model->name = ' leonora ';
+echo $model->name; // Leonora
+// This transform is applied on set, so the underlying value matches the transformed value.
+echo $model->getRaw('name'); // 'Leonora'
 
-$model->email = 'Galadriel@example.COM';
-echo $model->email; // galadriel@example.com
-echo $model->getRaw('email') // 'Galadriel@example.COM';
+$model->email = 'Leonora@example.COM';
+echo $model->email; // leonora@example.com
+// This transform applies on get, so the underlying value is unchanged from what was set
+echo $model->getRaw('email'); // 'Leonora@example.COM' 
 
 $model->value = 'Hello, World!';
 echo $model->value; // 'Hello, World!'
+// This transform applies on both set and get, so the underlying value is transformed
 echo $model->getRaw('value') // SGVsbG8sIFdvcmxkIQ==
+```
+
+### Getter
+
+The `#[Getter]` attribute and the `Getters` trait will convert class methods into magic properties.
+
+```php
+class Model {
+  use Getters;
+
+  #[Getter]
+  public function name(): string {
+    return 'Leonora';
+  }
+}
+
+$model = new Model();
+echo $model->name; // Leonora
 ```
