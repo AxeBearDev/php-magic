@@ -1,7 +1,11 @@
 <?php
 
-namespace AxeBear\Magic;
+namespace AxeBear\Magic\Attributes;
 
+use AxeBear\Magic\Magic;
+use AxeBear\Magic\MagicEvent;
+use AxeBear\Magic\MagicException;
+use AxeBear\Magic\MakesClosures;
 use ReflectionMethod;
 use ReflectionParameter;
 

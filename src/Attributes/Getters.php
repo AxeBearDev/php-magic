@@ -1,7 +1,9 @@
 <?php
 
-namespace AxeBear\Magic;
+namespace AxeBear\Magic\Attributes;
 
+use AxeBear\Magic\Magic;
+use AxeBear\Magic\MagicEvent;
 use ReflectionMethod;
 
 trait Getters

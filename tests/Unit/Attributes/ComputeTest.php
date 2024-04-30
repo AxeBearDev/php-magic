@@ -1,7 +1,7 @@
 <?php
 
-use AxeBear\Magic\Compute;
-use AxeBear\Magic\Computes;
+use AxeBear\Magic\Attributes\Compute;
+use AxeBear\Magic\Attributes\Computes;
 
 describe('#[Compute]', function () {
     test('with parameters', function () {

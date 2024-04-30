@@ -1,12 +1,17 @@
 <?php
 
-namespace AxeBear\Magic;
+namespace AxeBear\Magic\Attributes;
 
+use AxeBear\Magic\Magic;
+use AxeBear\Magic\MagicEvent;
+use AxeBear\Magic\MagicException;
+use AxeBear\Magic\MakesClosures;
 use ReflectionProperty;
 
 trait Transforms
 {
     use Magic;
+    use MakesClosures;
 
     public function getRaw(string $property): mixed
     {
@@ -34,7 +39,7 @@ trait Transforms
         if ($transform->onGet) {
             $this->onGet($propertyName, function (MagicEvent $event) use ($property, $transform) {
                 $value = $property->getValue($this);
-                $event->output($transform->apply($this, $value, $transform->onGet));
+                $event->output($this->applyTransforms($value, $transform->onGet));
             });
         }
 
@@ -48,7 +53,7 @@ trait Transforms
         if ($transform->onSet) {
             // Add __set handlers if provided
             $this->onSet($propertyName, function (MagicEvent $event) use ($property, $transform) {
-                $value = $transform->apply($this, $event->input, $transform->onSet);
+                $value = $this->applyTransforms($event->input, $transform->onSet);
                 $property->setValue($this, $value);
                 $event->output($value);
             });
@@ -59,5 +64,20 @@ trait Transforms
                 $event->output($event->input);
             });
         }
+    }
+
+    /**
+     * Applies a list of transformers to a value and return the result
+     *
+     * @param  array<callable(mixed): mixed>  $transformers
+     */
+    protected function applyTransforms(mixed $value, array $transformers): mixed
+    {
+        foreach ($transformers as $transformer) {
+            $transformer = $this->makeClosure($this, $transformer);
+            $value = $transformer($value);
+        }
+
+        return $value;
     }
 }

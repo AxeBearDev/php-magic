@@ -2,8 +2,9 @@
 
 namespace Tests\Unit;
 
-use AxeBear\Magic\Transform;
-use AxeBear\Magic\Transforms;
+use AxeBear\Magic\Attributes\Transform;
+use AxeBear\Magic\Attributes\Transforms;
+use AxeBear\Magic\MagicException;
 
 describe('#[Transform]', function () {
     test('onSet', function () {
@@ -106,7 +107,7 @@ describe('#[Transform]', function () {
     });
 
     test('exception for public properties', function () {
-        $this->expectException(\AxeBear\Magic\MagicException::class);
+        $this->expectException(MagicException::class);
 
         class PublicTransformUser
         {
