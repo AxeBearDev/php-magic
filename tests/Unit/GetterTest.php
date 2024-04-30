@@ -2,7 +2,6 @@
 
 use AxeBear\Magic\Getter;
 use AxeBear\Magic\Getters;
-use AxeBear\Magic\MagicException;
 
 describe('#[Getter]', function () {
     test('aliases', function () {
@@ -26,22 +25,29 @@ describe('#[Getter]', function () {
         expect($user->first_name)->toBe('Jean');
     });
 
-    test('non-public getter methods', function () {
-        /**
-         * @property string $firstName
-         */
-        class NonPublicUser
+    test('getter with parameters and caching', function () {
+        class DependencyUser
         {
             use Getters;
 
-            #[Getter]
-            private function firstName(): string
+            public string $firstName = 'Jean';
+
+            public function getLastName(): string
             {
-                return 'Jean';
+                return 'Doe';
+            }
+
+            #[Getter(useCache: true)]
+            protected function fullName(string $firstName, string $getLastName): string
+            {
+                return $firstName.' '.$getLastName;
             }
         }
 
-        $this->expectException(MagicException::class);
-        new NonPublicUser();
+        $user = new DependencyUser();
+        expect($user->fullName)->toBe('Jean Doe');
+
+        $user->firstName = 'Jane';
+        expect($user->fullName)->toBe('Jane Doe');
     });
 });
