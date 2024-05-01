@@ -14,16 +14,16 @@ trait Magic
     use BootsTraits;
 
     /* @var array<callable(MagicEvent): void> */
-    protected array $callers = [];
+    private array $callers = [];
 
     /* @var array<callable(MagicEvent): void> */
-    protected static array $staticCallers = [];
+    private static array $staticCallers = [];
 
     /* @var array<callable(MagicEvent): void> */
-    protected array $getters = [];
+    private array $getters = [];
 
     /* @var array<callable(MagicEvent): void> */
-    protected array $setters = [];
+    private array $setters = [];
 
     public function onCall(string $name, Closure ...$handlers): void
     {

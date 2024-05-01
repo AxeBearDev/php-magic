@@ -75,3 +75,59 @@ class Model {
 $model = new Model();
 echo $model->name; // Leonora
 ```
+
+### Compute
+
+This is a fancier version of the `#[Getter]` attribute and trait that supports arguments in the getter method. If `useCache` is set to `true`, the method and argument values will be used to cache the result of the computation and return it on subsequent calls.
+
+```php
+class Model {
+  use Computes;
+
+  public string $defaultName = 'leonora';
+
+  #[Compute(useCache: true)]
+  public function name(string $defaultName): string {
+    return ucfirst($defaultName);
+  }
+}
+$model = new Model();
+echo $model->name; // Leonora
+echo $model->name('ernst'); // ernst
+```
+
+### Track Changes
+
+The `#[TrackChanges]` attribute and/or the `TrackChanges` trait will track changes to protected class properties.
+
+You can either track changes to specific properties or to all of the protected properties in a class.
+
+```php
+class Model {
+  use TrackChanges;
+
+  #[TrackChanges]
+  protected string $name;
+}
+
+$model = new Model();
+$model->name = 'Leonora';
+$model->name = 'Leonora Carrington';
+$model->getTrackedChanges(); // [ 'name' => ['Leonora', 'Leonora Carrington'] ]
+$model->rollbackChanges('name');
+```php
+
+Tracking on the class level may give you more than you expect, since all protected properties will be tracked and made public, including inherited properties.
+  
+```php
+#[TrackChages]
+class Model {
+  use TrackChanges;
+
+  protected string $name;
+}
+
+$model = new Model();
+$model->name = 'Leonora';
+$model->name = 'Leonora Carrington';
+```
