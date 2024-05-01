@@ -1,7 +1,9 @@
 <?php
 
-namespace AxeBear\Magic;
+namespace AxeBear\Magic\Traits;
 
+use AxeBear\Magic\Events\MagicEvent;
+use AxeBear\Magic\Exceptions\MagicException;
 use Closure;
 use ReflectionClass;
 

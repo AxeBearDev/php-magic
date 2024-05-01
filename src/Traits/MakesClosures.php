@@ -1,7 +1,8 @@
 <?php
 
-namespace AxeBear\Magic;
+namespace AxeBear\Magic\Traits;
 
+use AxeBear\Magic\Exceptions\MagicException;
 use Closure;
 
 trait MakesClosures

@@ -3,8 +3,8 @@
 namespace Tests\Unit;
 
 use AxeBear\Magic\Attributes\Transform;
-use AxeBear\Magic\Attributes\Transforms;
-use AxeBear\Magic\MagicException;
+use AxeBear\Magic\Exceptions\MagicException;
+use AxeBear\Magic\Traits\Transforms;
 
 describe('#[Transform]', function () {
     test('onSet', function () {

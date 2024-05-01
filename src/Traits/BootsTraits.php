@@ -1,6 +1,6 @@
 <?php
 
-namespace AxeBear\Magic;
+namespace AxeBear\Magic\Traits;
 
 use ReflectionClass;
 

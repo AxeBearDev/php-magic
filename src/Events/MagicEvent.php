@@ -1,6 +1,6 @@
 <?php
 
-namespace AxeBear\Magic;
+namespace AxeBear\Magic\Events;
 
 /**
  * Represents an instance when a magic method is called

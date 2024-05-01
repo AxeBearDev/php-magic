@@ -1,7 +1,7 @@
 <?php
 
 use AxeBear\Magic\Attributes\Getter;
-use AxeBear\Magic\Attributes\Getters;
+use AxeBear\Magic\Traits\Getters;
 
 describe('#[Getter]', function () {
     test('aliases', function () {

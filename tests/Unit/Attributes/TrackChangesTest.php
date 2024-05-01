@@ -1,9 +1,9 @@
 <?php
 
 use AxeBear\Magic\Attributes\TrackChanges;
-use AxeBear\Magic\Attributes\TracksChanges;
 use AxeBear\Magic\Attributes\Transform;
-use AxeBear\Magic\Attributes\Transforms;
+use AxeBear\Magic\Traits\TracksChanges;
+use AxeBear\Magic\Traits\Transforms;
 
 describe('#[TrackChanges]', function () {
     test('class-level', function () {

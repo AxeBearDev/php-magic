@@ -1,8 +1,8 @@
 <?php
 
-use AxeBear\Magic\Attributes\Fluency;
 use AxeBear\Magic\Attributes\Fluent;
-use AxeBear\Magic\MagicException;
+use AxeBear\Magic\Exceptions\MagicException;
+use AxeBear\Magic\Traits\Fluency;
 
 describe('#[Fluent]', function () {
     test('default to public', function () {

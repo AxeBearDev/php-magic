@@ -1,9 +1,9 @@
 <?php
 
-namespace AxeBear\Magic\Attributes;
+namespace AxeBear\Magic\Traits;
 
-use AxeBear\Magic\Magic;
-use AxeBear\Magic\MagicEvent;
+use AxeBear\Magic\Attributes\Fluent;
+use AxeBear\Magic\Events\MagicEvent;
 use BadMethodCallException;
 use ReflectionClass;
 
