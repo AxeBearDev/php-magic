@@ -3,7 +3,6 @@
 namespace AxeBear\Magic\Attributes;
 
 use Attribute;
-use ReflectionMethod;
 
 /**
  * Adds property getters to a class using the targeted method to provide the value.
@@ -18,10 +17,5 @@ class Getter
      */
     public function __construct(public array $aliases = [])
     {
-    }
-
-    public function getValue(object|string $instance, ReflectionMethod $method): mixed
-    {
-        return $method->invoke($instance);
     }
 }

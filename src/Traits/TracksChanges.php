@@ -97,7 +97,7 @@ trait TracksChanges
     protected function trackChange(MagicSetEvent $event)
     {
         $name = $event->name;
-        $value = $event->hasOutput() ? $event->getOutput() : $event->input;
+        $value = $event->hasOutput() ? $event->getOutput() : $event->value;
 
         // Record the change
         $this->changes[$name][] = $value;

@@ -28,8 +28,8 @@ trait Getters
         foreach ($aliases as $alias) {
             $this->onGet(
                 $alias,
-                function (MagicEvent $event) use ($getter, $method) {
-                    $event->setOutput($getter->getValue($this, $method));
+                function (MagicEvent $event) use ($method) {
+                    $event->setOutput($method->invoke($this));
                 }
             );
         }

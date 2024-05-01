@@ -86,6 +86,20 @@ trait Magic
         return static::useMagic('__set', $event, $setters, $fallback);
     }
 
+    public function __isset(string $name): bool
+    {
+        return isset($this->getters[$name]) || parent::__isset($name);
+    }
+
+    public function __unset(string $name): void
+    {
+        if (isset($this->setters[$name])) {
+            unset($this->setters[$name]);
+        } else {
+            parent::__unset($name);
+        }
+    }
+
     protected static function useMagic(string $type, MagicEvent $event, array $handlers, Closure $fallback)
     {
         foreach ($handlers as $handler) {

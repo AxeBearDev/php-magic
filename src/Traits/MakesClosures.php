@@ -19,7 +19,7 @@ trait MakesClosures
         }
 
         if (! is_callable($callable)) {
-            throw new MagicException('Method '.$handler.' is not callable');
+            throw new MagicException('The provided handler is not callable');
         }
 
         return $callable;

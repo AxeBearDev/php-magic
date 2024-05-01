@@ -8,11 +8,11 @@ namespace AxeBear\Magic\Events;
 class MagicSetEvent extends MagicEvent
 {
     /**
-     * @param  T  $input
+     * @param  T  $value
      */
     public function __construct(
       public string $name,
-      public mixed $input,
+      public mixed $value,
     ) {
     }
 }

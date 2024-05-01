@@ -3,7 +3,8 @@
 namespace AxeBear\Magic\Traits;
 
 use AxeBear\Magic\Attributes\Transform;
-use AxeBear\Magic\Events\MagicEvent;
+use AxeBear\Magic\Events\MagicGetEvent;
+use AxeBear\Magic\Events\MagicSetEvent;
 use AxeBear\Magic\Exceptions\MagicException;
 use ReflectionProperty;
 
@@ -36,14 +37,14 @@ trait Transforms
 
         // Add __get handlers
         if ($transform->onGet) {
-            $this->onGet($propertyName, function (MagicEvent $event) use ($property, $transform) {
+            $this->onGet($propertyName, function (MagicGetEvent $event) use ($property, $transform) {
                 $value = $property->getValue($this);
                 $event->setOutput($this->applyTransforms($value, $transform->onGet));
             });
         }
 
         // Always return either the transformed or raw value at the end of the transformations
-        $this->onGet($propertyName, function (MagicEvent $event) use ($propertyName) {
+        $this->onGet($propertyName, function (MagicGetEvent $event) use ($propertyName) {
             if (! $event->hasOutput()) {
                 $event->setOutput($this->getRaw($propertyName));
             }
@@ -51,16 +52,16 @@ trait Transforms
 
         if ($transform->onSet) {
             // Add __set handlers if provided
-            $this->onSet($propertyName, function (MagicEvent $event) use ($property, $transform) {
-                $value = $this->applyTransforms($event->input, $transform->onSet);
+            $this->onSet($propertyName, function (MagicSetEvent $event) use ($property, $transform) {
+                $value = $this->applyTransforms($event->value, $transform->onSet);
                 $property->setValue($this, $value);
                 $event->setOutput($value);
             });
         } else {
             // Otherwise, just set the internal value
-            $this->onSet($propertyName, function (MagicEvent $event) use ($property) {
-                $property->setValue($this, $event->input);
-                $event->setOutput($event->input);
+            $this->onSet($propertyName, function (MagicSetEvent $event) use ($property) {
+                $property->setValue($this, $event->value);
+                $event->setOutput($event->value);
             });
         }
     }
