@@ -8,6 +8,9 @@ use AxeBear\Magic\MagicException;
 use ReflectionClass;
 use ReflectionProperty;
 
+/**
+ * Converts protected properties into tracked, public properties.
+ */
 trait TracksChanges
 {
     use Magic;
@@ -52,7 +55,8 @@ trait TracksChanges
             $this->onGet(
                 $property->getName(),
                 function (MagicEvent $event) use ($property) {
-                    $event->output($property->getValue($this));
+                    $value = $event->hasOutput() ? $event->output : $property->getValue($this);
+                    $event->output($value);
                 }
             );
         }

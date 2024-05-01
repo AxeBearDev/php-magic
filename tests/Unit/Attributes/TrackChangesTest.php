@@ -2,6 +2,8 @@
 
 use AxeBear\Magic\Attributes\TrackChanges;
 use AxeBear\Magic\Attributes\TracksChanges;
+use AxeBear\Magic\Attributes\Transform;
+use AxeBear\Magic\Attributes\Transforms;
 
 describe('#[TrackChanges]', function () {
     test('class-level', function () {
@@ -85,5 +87,29 @@ describe('#[TrackChanges]', function () {
         $user->rollbackChanges();
         expect($user->firstName)->toBe('Jean');
         expect($user->lastName)->toBe('Doe');
+    });
+
+    test('track with transform', function () {
+        #[TrackChanges]
+        class TransformUser
+        {
+            use Transforms;
+            use TracksChanges;
+
+            #[Transform(onSet: ['strtoupper'])]
+            protected string $firstName = 'Jean';
+
+            #[Transform(onGet: ['strtoupper'])]
+            protected string $lastName = 'Doe';
+        }
+
+        $user = new TransformUser();
+        $user->firstName = 'Jane';
+        $user->lastName = 'Smith';
+
+        expect($user->firstName)->toBe('JANE');
+        expect($user->lastName)->toBe('SMITH');
+        expect($user->getTrackedChanges('firstName'))->toBe(['Jean', 'JANE']);
+        expect($user->getTrackedChanges('lastName'))->toBe(['Doe', 'Smith']);
     });
 });
