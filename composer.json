@@ -16,8 +16,7 @@
   ],
   "require-dev": {
     "pestphp/pest": "^2.34",
-    "psy/psysh": "@stable",
-    "phpstan/phpstan": "^1.10"
+    "psy/psysh": "@stable"
   },
   "scripts": {
     "test": "vendor/bin/pest",

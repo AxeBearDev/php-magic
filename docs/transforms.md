@@ -1,0 +1,42 @@
+# Transforms
+
+The `#[Transform]` attribute and the `Transforms` trait work together to apply changes to class properties when they are set or retrieved.
+
+```php
+class Model {
+  use Transforms;
+
+  #[Transform(onSet: ['ucfirst', 'trim'])]
+  protected string $name;
+
+  #[Transform(onGet: ['strtolower'])]
+  protected string $email;
+
+  #[Transform(onSet: ['encode'], onGet: ['decode'])]
+  protected string $value;
+
+  public function encode(string $value): string {
+    return base64_encode($value);
+  }
+
+  public function decode(string $value): string {
+    return base64_decode($value);
+  }
+}
+
+$model = new Model();
+$model->name = ' leonora ';
+echo $model->name; // Leonora
+// This transform is applied on set, so the underlying value matches the transformed value.
+echo $model->getRaw('name'); // 'Leonora'
+
+$model->email = 'Leonora@example.COM';
+echo $model->email; // leonora@example.com
+// This transform applies on get, so the underlying value is unchanged from what was set
+echo $model->getRaw('email'); // 'Leonora@example.COM' 
+
+$model->value = 'Hello, World!';
+echo $model->value; // 'Hello, World!'
+// This transform applies on both set and get, so the underlying value is transformed
+echo $model->getRaw('value') // SGVsbG8sIFdvcmxkIQ==
+```
