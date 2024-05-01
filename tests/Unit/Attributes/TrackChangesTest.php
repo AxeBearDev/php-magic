@@ -49,11 +49,41 @@ describe('#[TrackChanges]', function () {
         $user->firstName = 'Jane';
         $user->lastName = 'Smith';
 
+        expect($user->firstName)->toBe('Jane');
+        expect($user->lastName)->toBe('Smith');
         expect($user->getTrackedChanges('notTracked'))->toBe(null);
         expect($user->getTrackedChanges('firstName'))->toBe(['Jean', 'Jane']);
         expect($user->getTrackedChanges('lastName'))->toBe(['Doe', 'Smith']);
 
         $user->changeLastName('Johnson');
+        expect($user->lastName)->toBe('Johnson');
         expect($user->getTrackedChanges('lastName'))->toBe(['Doe', 'Smith', 'Johnson']);
+    });
+
+    test('rollback', function () {
+        #[TrackChanges]
+        class RollbackUser
+        {
+            use TracksChanges;
+
+            protected string $firstName = 'Jean';
+
+            protected string $lastName = 'Doe';
+        }
+
+        $user = new RollbackUser();
+        $user->firstName = 'Jane';
+        $user->lastName = 'Smith';
+
+        expect($user->firstName)->toBe('Jane');
+        expect($user->lastName)->toBe('Smith');
+
+        $user->rollbackChanges('firstName');
+        expect($user->firstName)->toBe('Jean');
+        expect($user->lastName)->toBe('Smith');
+
+        $user->rollbackChanges();
+        expect($user->firstName)->toBe('Jean');
+        expect($user->lastName)->toBe('Doe');
     });
 });

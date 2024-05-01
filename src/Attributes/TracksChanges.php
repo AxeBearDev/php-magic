@@ -14,6 +14,19 @@ trait TracksChanges
 
     protected array $changes = [];
 
+    public function rollbackChanges(?string $key = null): void
+    {
+        $changes = $key ? [$key => $this->changes[$key] ?? []] : $this->changes;
+        foreach ($changes as $property => $values) {
+            if (count($values) < 2) {
+                continue;
+            }
+            [$first] = $values;
+            $this->$property = $first;
+            $this->changes[$property] = [$first];
+        }
+    }
+
     public function getTrackedChanges(?string $key = null): ?array
     {
         return $key ? $this->changes[$key] ?? null : $this->changes;
@@ -26,11 +39,20 @@ trait TracksChanges
             // Initialize the changes array for the property
             $this->changes[$property->getName()] = [$property->getValue($this)];
 
-            // Watch for changes
+            // Watch for changes to the property
             $this->onSet(
                 $property->getName(),
-                function (MagicEvent $event) {
+                function (MagicEvent $event) use ($property) {
                     $this->trackChange($event);
+                    $property->setValue($this, $event->output);
+                }
+            );
+
+            // Make the property publicly accessible
+            $this->onGet(
+                $property->getName(),
+                function (MagicEvent $event) use ($property) {
+                    $event->output($property->getValue($this));
                 }
             );
         }
@@ -38,6 +60,8 @@ trait TracksChanges
 
     /**
      * Gets an array of the ReflectionProperty objects that are tracked by the class.
+     *
+     * @return ReflectionProperty[]
      */
     public function getTrackedProperties(): array
     {

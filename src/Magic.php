@@ -51,7 +51,7 @@ trait Magic
         $callers = $this->callers[$name] ?? [];
         $fallback = fn () => parent::__call($name, $arguments);
 
-        return static::useMagic($this, $event, $callers, $fallback);
+        return static::useMagic('__call', $event, $callers, $fallback);
     }
 
     public static function __callStatic(string $name, array $arguments)
@@ -60,7 +60,7 @@ trait Magic
         $callers = static::$staticCallers[$name] ?? [];
         $fallback = fn () => parent::__callStatic($name, $arguments);
 
-        return static::useMagic(static::class, $event, $callers, $fallback);
+        return static::useMagic('__callStatic', $event, $callers, $fallback);
     }
 
     public function __get(string $name)
@@ -69,7 +69,7 @@ trait Magic
         $getters = $this->getters[$name] ?? [];
         $fallback = fn () => parent::__get($name);
 
-        return static::useMagic($this, $event, $getters, $fallback);
+        return static::useMagic('__get', $event, $getters, $fallback);
     }
 
     public function __set(string $name, mixed $value)
@@ -78,10 +78,10 @@ trait Magic
         $setters = $this->setters[$name] ?? [];
         $fallback = fn () => parent::__set($name, $value);
 
-        return static::useMagic($this, $event, $setters, $fallback);
+        return static::useMagic('__set', $event, $setters, $fallback);
     }
 
-    protected static function useMagic(object|string $context, MagicEvent $event, array $handlers, Closure $fallback)
+    protected static function useMagic(string $type, MagicEvent $event, array $handlers, Closure $fallback)
     {
         foreach ($handlers as $handler) {
             $handler($event);
@@ -105,7 +105,7 @@ trait Magic
             return $fallback();
         }
 
-        throw new MagicException('No '.$event->type.' handler found for '.static::class.'::'.$event->name);
+        throw new MagicException('No '.$type.' handler found for '.static::class.'::'.$event->name);
     }
 
     public function eachMagicMethod(string $attributeName, Closure $callback): void
