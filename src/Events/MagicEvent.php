@@ -7,7 +7,7 @@ namespace AxeBear\Magic\Events;
  *
  * @template T
  */
-abstract class MagicEvent
+class MagicEvent
 {
     /**
      * The name of the member being accessed
