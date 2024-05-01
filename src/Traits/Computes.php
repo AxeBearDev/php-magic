@@ -33,14 +33,14 @@ trait Computes
             $args = $this->getArguments($method);
 
             if (! $compute->useCache) {
-                $event->output($method->invoke($this, ...$args));
+                $event->setOutput($method->invoke($this, ...$args));
 
                 return;
             }
 
             $cacheKey = $this->cacheKey($method, $args);
             $this->computeCache[$cacheKey] ??= $method->invoke($this, ...$args);
-            $event->output($this->computeCache[$cacheKey]);
+            $event->setOutput($this->computeCache[$cacheKey]);
         };
 
         foreach ($aliases as $alias) {

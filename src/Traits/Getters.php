@@ -29,7 +29,7 @@ trait Getters
             $this->onGet(
                 $alias,
                 function (MagicEvent $event) use ($getter, $method) {
-                    $event->output($getter->getValue($this, $method));
+                    $event->setOutput($getter->getValue($this, $method));
                 }
             );
         }

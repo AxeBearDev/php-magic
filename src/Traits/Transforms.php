@@ -38,14 +38,14 @@ trait Transforms
         if ($transform->onGet) {
             $this->onGet($propertyName, function (MagicEvent $event) use ($property, $transform) {
                 $value = $property->getValue($this);
-                $event->output($this->applyTransforms($value, $transform->onGet));
+                $event->setOutput($this->applyTransforms($value, $transform->onGet));
             });
         }
 
         // Always return either the transformed or raw value at the end of the transformations
         $this->onGet($propertyName, function (MagicEvent $event) use ($propertyName) {
             if (! $event->hasOutput()) {
-                $event->output($this->getRaw($propertyName));
+                $event->setOutput($this->getRaw($propertyName));
             }
         });
 
@@ -54,13 +54,13 @@ trait Transforms
             $this->onSet($propertyName, function (MagicEvent $event) use ($property, $transform) {
                 $value = $this->applyTransforms($event->input, $transform->onSet);
                 $property->setValue($this, $value);
-                $event->output($value);
+                $event->setOutput($value);
             });
         } else {
             // Otherwise, just set the internal value
             $this->onSet($propertyName, function (MagicEvent $event) use ($property) {
                 $property->setValue($this, $event->input);
-                $event->output($event->input);
+                $event->setOutput($event->input);
             });
         }
     }

@@ -2,7 +2,10 @@
 
 namespace AxeBear\Magic\Traits;
 
+use AxeBear\Magic\Events\MagicCallEvent;
 use AxeBear\Magic\Events\MagicEvent;
+use AxeBear\Magic\Events\MagicGetEvent;
+use AxeBear\Magic\Events\MagicSetEvent;
 use AxeBear\Magic\Exceptions\MagicException;
 use Closure;
 use ReflectionClass;
@@ -49,7 +52,7 @@ trait Magic
 
     public function __call(string $name, array $arguments)
     {
-        $event = new MagicEvent($name, $arguments);
+        $event = new MagicCallEvent($name, $arguments);
         $callers = $this->callers[$name] ?? [];
         $fallback = fn () => parent::__call($name, $arguments);
 
@@ -58,7 +61,7 @@ trait Magic
 
     public static function __callStatic(string $name, array $arguments)
     {
-        $event = new MagicEvent($name, $arguments);
+        $event = new MagicCallEvent($name, $arguments);
         $callers = static::$staticCallers[$name] ?? [];
         $fallback = fn () => parent::__callStatic($name, $arguments);
 
@@ -67,7 +70,7 @@ trait Magic
 
     public function __get(string $name)
     {
-        $event = new MagicEvent($name);
+        $event = new MagicGetEvent($name);
         $getters = $this->getters[$name] ?? [];
         $fallback = fn () => parent::__get($name);
 
@@ -76,7 +79,7 @@ trait Magic
 
     public function __set(string $name, mixed $value)
     {
-        $event = new MagicEvent($name, $value);
+        $event = new MagicSetEvent($name, $value);
         $setters = $this->setters[$name] ?? [];
         $fallback = fn () => parent::__set($name, $value);
 
@@ -93,14 +96,14 @@ trait Magic
             }
 
             if ($event->hasOutput()) {
-                return $event->output;
+                return $event->getOutput();
             } else {
                 return;
             }
         }
 
         if ($event->hasOutput()) {
-            return $event->output;
+            return $event->getOutput();
         }
 
         if (class_parents(self::class)) {

@@ -3,7 +3,8 @@
 namespace AxeBear\Magic\Traits;
 
 use AxeBear\Magic\Attributes\TrackChanges;
-use AxeBear\Magic\Events\MagicEvent;
+use AxeBear\Magic\Events\MagicGetEvent;
+use AxeBear\Magic\Events\MagicSetEvent;
 use AxeBear\Magic\Exceptions\MagicException;
 use ReflectionClass;
 use ReflectionProperty;
@@ -45,18 +46,18 @@ trait TracksChanges
             // Watch for changes to the property
             $this->onSet(
                 $property->getName(),
-                function (MagicEvent $event) use ($property) {
+                function (MagicSetEvent $event) use ($property) {
                     $this->trackChange($event);
-                    $property->setValue($this, $event->output);
+                    $property->setValue($this, $event->getOutput());
                 }
             );
 
             // Make the property publicly accessible
             $this->onGet(
                 $property->getName(),
-                function (MagicEvent $event) use ($property) {
-                    $value = $event->hasOutput() ? $event->output : $property->getValue($this);
-                    $event->output($value);
+                function (MagicGetEvent $event) use ($property) {
+                    $value = $event->hasOutput() ? $event->getOutput() : $property->getValue($this);
+                    $event->setOutput($value);
                 }
             );
         }
@@ -93,15 +94,15 @@ trait TracksChanges
         return $tracked;
     }
 
-    protected function trackChange(MagicEvent $event)
+    protected function trackChange(MagicSetEvent $event)
     {
         $name = $event->name;
-        $value = $event->hasOutput() ? $event->output : $event->input;
+        $value = $event->hasOutput() ? $event->getOutput() : $event->input;
 
         // Record the change
         $this->changes[$name][] = $value;
 
         // Set the property in case it hasn't been set yet
-        $event->output($value);
+        $event->setOutput($value);
     }
 }

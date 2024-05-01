@@ -3,7 +3,7 @@
 namespace AxeBear\Magic\Traits;
 
 use AxeBear\Magic\Attributes\Fluent;
-use AxeBear\Magic\Events\MagicEvent;
+use AxeBear\Magic\Events\MagicCallEvent;
 use BadMethodCallException;
 use ReflectionClass;
 
@@ -18,14 +18,14 @@ trait Fluency
         $props = $reflection->getProperties($visibility);
 
         foreach ($props as $prop) {
-            $this->onCall($prop->getName(), function (MagicEvent $event) use ($prop) {
-                if (! is_array($event->input) || count($event->input) !== 1) {
+            $this->onCall($prop->getName(), function (MagicCallEvent $event) use ($prop) {
+                if (! is_array($event->arguments) || count($event->arguments) !== 1) {
                     throw new BadMethodCallException("Method {$event->name} expects exactly one argument.");
                 }
-                [$value] = $event->input;
+                [$value] = $event->arguments;
 
                 $prop->setValue($this, $value);
-                $event->output($this);
+                $event->setOutput($this);
             });
         }
     }

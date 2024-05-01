@@ -4,41 +4,25 @@ namespace AxeBear\Magic\Events;
 
 /**
  * Represents an instance when a magic method is called
+ *
+ * @template T
  */
-class MagicEvent
+abstract class MagicEvent
 {
+    /**
+     * The name of the member being accessed
+     */
+    public string $name = '';
+
     /** Should propagation of this event should stop */
     public bool $stopped = false;
 
-    /** The result of the magic event method */
-    public mixed $output;
-
-    public function __construct(
-      /** The name param sent to the magic method */
-      public string $name,
-
-      /** The arguments sent to the magic method */
-      public mixed $input = null,
-    ) {
-    }
-
     /**
-     * Does this event have an output set?
+     * The resulting output of the event
+     *
+     * @var T
      */
-    public function hasOutput(): bool
-    {
-        return isset($this->output);
-    }
-
-    /**
-     * Set the output for this event
-     */
-    public function output(mixed $output): self
-    {
-        $this->output = $output;
-
-        return $this;
-    }
+    protected mixed $output;
 
     /**
      * Stop this event from propagating
@@ -48,5 +32,28 @@ class MagicEvent
         $this->stopped = true;
 
         return $this;
+    }
+
+    public function hasOutput(): bool
+    {
+        return isset($this->output);
+    }
+
+    /**
+     * @param  T  $output
+     */
+    public function setOutput(mixed $output): self
+    {
+        $this->output = $output;
+
+        return $this;
+    }
+
+    /**
+     * @return T
+     */
+    public function getOutput(): mixed
+    {
+        return $this->hasOutput() ? $this->output : null;
     }
 }
