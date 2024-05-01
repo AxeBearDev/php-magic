@@ -14,9 +14,6 @@ class MagicEvent
     public mixed $output;
 
     public function __construct(
-      /** The type of magic method called (e.g. __call, __set, etc.) */
-      public string $type,
-
       /** The name param sent to the magic method */
       public string $name,
 

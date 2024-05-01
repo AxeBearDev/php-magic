@@ -47,7 +47,7 @@ trait Magic
 
     public function __call(string $name, array $arguments)
     {
-        $event = new MagicEvent(__METHOD__, $name, $arguments);
+        $event = new MagicEvent($name, $arguments);
         $callers = $this->callers[$name] ?? [];
         $fallback = fn () => parent::__call($name, $arguments);
 
@@ -56,7 +56,7 @@ trait Magic
 
     public static function __callStatic(string $name, array $arguments)
     {
-        $event = new MagicEvent(__METHOD__, $name, $arguments);
+        $event = new MagicEvent($name, $arguments);
         $callers = static::$staticCallers[$name] ?? [];
         $fallback = fn () => parent::__callStatic($name, $arguments);
 
@@ -65,7 +65,7 @@ trait Magic
 
     public function __get(string $name)
     {
-        $event = new MagicEvent(__METHOD__, $name);
+        $event = new MagicEvent($name);
         $getters = $this->getters[$name] ?? [];
         $fallback = fn () => parent::__get($name);
 
@@ -74,7 +74,7 @@ trait Magic
 
     public function __set(string $name, mixed $value)
     {
-        $event = new MagicEvent(__METHOD__, $name, $value);
+        $event = new MagicEvent($name, $value);
         $setters = $this->setters[$name] ?? [];
         $fallback = fn () => parent::__set($name, $value);
 
