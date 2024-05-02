@@ -15,7 +15,7 @@ class Compute
      *
      * @param  array<string>  $aliases The aliases for the getter method
      */
-    public function __construct(public array $aliases = [], public bool $useCache = false)
+    public function __construct(public array $aliases = [], public bool $useCache = true)
     {
     }
 }
