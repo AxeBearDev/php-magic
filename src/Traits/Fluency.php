@@ -19,9 +19,16 @@ trait Fluency
 
         foreach ($props as $prop) {
             $this->onCall($prop->getName(), function (MagicCallEvent $event) use ($prop) {
-                if (! is_array($event->arguments) || count($event->arguments) !== 1) {
-                    throw new BadMethodCallException("Method {$event->name} expects exactly one argument.");
+                if (! is_array($event->arguments) || count($event->arguments) > 1) {
+                    throw new BadMethodCallException("Method {$event->name} expects zero or one argument.");
                 }
+
+                if (count($event->arguments) === 0) {
+                    $event->setOutput($prop->getValue($this));
+
+                    return;
+                }
+
                 [$value] = $event->arguments;
 
                 $prop->setValue($this, $value);
