@@ -16,22 +16,19 @@ trait BootsTraits
         }
 
         $this->bootTraits();
-        $this->init();
+        $this->traitsBooted();
     }
 
     /**
      * Provides a hook for initializing the class after the constructor has run.
-     *
-     * @return void
      */
-    protected function init(): void {
+    protected function traitsBooted(): void
+    {
         // noop
     }
 
     /**
      * Boots any traits that include a bootClassName method.
-     *
-     * @return void
      */
     protected function bootTraits(): void
     {
@@ -48,8 +45,6 @@ trait BootsTraits
 
     /**
      * Gets a list of traits used by the class or its parents.
-     *
-     * @return array
      */
     public function traits(): array
     {

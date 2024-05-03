@@ -193,6 +193,11 @@ trait Magic
         return $event->hasOutput() ? $event->getOutput() : null;
     }
 
+    /**
+     * Calls the provided callback for each method that has the specified attribute.
+     *
+     * @param fn (ReflectionMethod, Attribute) $callback
+     */
     public function eachMagicMethod(string $attributeName, Closure $callback): void
     {
         foreach ($this->getMagicMethods($attributeName) as [$method, $attributes]) {
@@ -202,6 +207,11 @@ trait Magic
         }
     }
 
+    /**
+     * Calls the provided callback for each property that has the specified attribute.
+     *
+     * @param fn (ReflectionMethod, Attribute) $callback
+     */
     public function eachMagicProperty(string $attributeName, Closure $callback): void
     {
         foreach ($this->getMagicProperties($attributeName) as [$property, $attributes]) {
