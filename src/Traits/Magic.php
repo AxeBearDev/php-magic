@@ -9,12 +9,11 @@ use AxeBear\Magic\Events\MagicSetEvent;
 use AxeBear\Magic\Exceptions\MagicException;
 use Closure;
 use ReflectionClass;
-use UnexpectedValueException;
 
 /**
  * Allows merging of many magic method overrides.
  * Also handles booting traits in the constructor.
- * 
+ *
  * @template MagicEventHandler of (MagicEvent) => void
  * @template MagicEventHandlers of array<string, array<MagicEventHandler>>
  */
@@ -37,10 +36,6 @@ trait Magic
     /**
      * Register handlers for calls to __call with names that match the specified pattern. Patterns
      * are matched using the fnmatch function.
-     *
-     * @param string $pattern
-     * @param Closure ...$handlers
-     * @return void
      */
     public function onCall(string $pattern, Closure ...$handlers): void
     {
@@ -51,9 +46,7 @@ trait Magic
      * Register handlers for calls to __callStatic with names that match the specified pattern. Patterns
      * are matched using the fnmatch function.
      *
-     * @param string $pattern
-     * @param MagicEventHandler ...$handlers
-     * @return void
+     * @param  MagicEventHandler  ...$handlers
      */
     public static function onStaticCall(string $pattern, Closure ...$handlers): void
     {
@@ -64,9 +57,7 @@ trait Magic
      * Register handlers for calls to __get with names that match the specified pattern. Patterns
      * are matched using the fnmatch function.
      *
-     * @param string $pattern
-     * @param MagicEventHandler ...$handlers
-     * @return void
+     * @param  MagicEventHandler  ...$handlers
      */
     public function onGet(string $pattern, Closure ...$handlers): void
     {
@@ -77,9 +68,7 @@ trait Magic
      * Register handlers for calls to __set with names that match the specified pattern. Patterns
      * are matched using the fnmatch function.
      *
-     * @param string $pattern
-     * @param MagicEventHandler ...$handlers
-     * @return void
+     * @param  MagicEventHandler  ...$handlers
      */
     public function onSet(string $pattern, Closure ...$handlers): void
     {
@@ -159,8 +148,7 @@ trait Magic
     /**
      * Collects the handlers for a magic event based on the name of the member called.
      *
-     * @param string $search
-     * @param MagicEventHandlers $handlers
+     * @param  MagicEventHandlers  $handlers
      * @return MagicEventHandler[]
      */
     protected static function findMagicHandlers(string $search, array $groups): array
@@ -180,17 +168,15 @@ trait Magic
      * Attempts to use the handlers to process the event. If none of the handlers stop the event or
      * provide output, the fallback closure is called.
      *
-     * @param string $type
-     * @param MagicEvent $event
-     * @param MagicEventHandlers[] $handlers
-     * @param Closure $fallback
+     * @param  string  $type
+     * @param  MagicEventHandlers[]  $handlers
      * @return void
      */
     protected static function useMagic(MagicEvent $event, array $handlers, Closure $fallback)
     {
         $fallback = (bool) class_parents(self::class)
           ? $fallback
-          : fn () => throw new MagicException('No handlers found for '. $event->name);
+          : fn () => throw new MagicException('No handlers found for '.$event->name);
 
         if (! $handlers) {
             return $fallback();
@@ -200,7 +186,7 @@ trait Magic
             $handler($event);
 
             if ($event->stopped) {
-              return $event->hasOutput() ? $event->getOutput() : null;
+                return $event->hasOutput() ? $event->getOutput() : null;
             }
         }
 
