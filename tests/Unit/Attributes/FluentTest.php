@@ -65,4 +65,10 @@ describe('#[Fluent]', function () {
         expect($user->firstName())->toBe($user->firstName);
         expect($user->email())->toBe($user->getEmail());
     });
+
+    test('invalid arguments', function () {
+        $user = new ProtectedFluentUser();
+        $this->expectException(InvalidArgumentException::class);
+        $user->firstName('Jane', 'extra');
+    });
 });

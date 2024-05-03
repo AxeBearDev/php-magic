@@ -9,81 +9,137 @@ use AxeBear\Magic\Events\MagicSetEvent;
 use AxeBear\Magic\Exceptions\MagicException;
 use Closure;
 use ReflectionClass;
+use UnexpectedValueException;
 
 /**
  * Allows merging of many magic method overrides.
  * Also handles booting traits in the constructor.
+ * 
+ * @template MagicEventHandler of (MagicEvent) => void
+ * @template MagicEventHandlers of array<string, array<MagicEventHandler>>
  */
 trait Magic
 {
     use BootsTraits;
 
-    /* @var array<callable(MagicEvent): void> */
+    /* @var MagicEventHandlers */
     private array $callers = [];
 
-    /* @var array<callable(MagicEvent): void> */
+    /* @var MagicEventHandlers */
     private static array $staticCallers = [];
 
-    /* @var array<callable(MagicEvent): void> */
+    /* @var MagicEventHandlers */
     private array $getters = [];
 
-    /* @var array<callable(MagicEvent): void> */
+    /* @var MagicEventHandlers */
     private array $setters = [];
 
-    public function onCall(string $name, Closure ...$handlers): void
+    /**
+     * Register handlers for calls to __call with names that match the specified pattern. Patterns
+     * are matched using the fnmatch function.
+     *
+     * @param string $pattern
+     * @param Closure ...$handlers
+     * @return void
+     */
+    public function onCall(string $pattern, Closure ...$handlers): void
     {
-        $this->callers[$name] = [...$this->callers[$name] ?? [], ...$handlers];
+        $this->callers[$pattern] = [...$this->callers[$pattern] ?? [], ...$handlers];
     }
 
-    public static function onStaticCall(string $name, Closure ...$handlers): void
+    /**
+     * Register handlers for calls to __callStatic with names that match the specified pattern. Patterns
+     * are matched using the fnmatch function.
+     *
+     * @param string $pattern
+     * @param MagicEventHandler ...$handlers
+     * @return void
+     */
+    public static function onStaticCall(string $pattern, Closure ...$handlers): void
     {
-        static::$staticCallers[$name] = [...static::$staticCallers[$name] ?? [], ...$handlers];
+        static::$staticCallers[$pattern] = [...static::$staticCallers[$pattern] ?? [], ...$handlers];
     }
 
-    public function onGet(string $name, Closure ...$handlers): void
+    /**
+     * Register handlers for calls to __get with names that match the specified pattern. Patterns
+     * are matched using the fnmatch function.
+     *
+     * @param string $pattern
+     * @param MagicEventHandler ...$handlers
+     * @return void
+     */
+    public function onGet(string $pattern, Closure ...$handlers): void
     {
-        $this->getters[$name] = [...$this->getters[$name] ?? [], ...$handlers];
+        $this->getters[$pattern] = [...$this->getters[$pattern] ?? [], ...$handlers];
     }
 
-    public function onSet(string $name, Closure ...$handlers): void
+    /**
+     * Register handlers for calls to __set with names that match the specified pattern. Patterns
+     * are matched using the fnmatch function.
+     *
+     * @param string $pattern
+     * @param MagicEventHandler ...$handlers
+     * @return void
+     */
+    public function onSet(string $pattern, Closure ...$handlers): void
     {
-        $this->setters[$name] = [...$this->setters[$name] ?? [], ...$handlers];
+        $this->setters[$pattern] = [...$this->setters[$pattern] ?? [], ...$handlers];
+    }
+
+    public function offsetGet(mixed $offset): mixed
+    {
+        return $this->__get($offset);
+    }
+
+    public function offsetSet(mixed $offset, mixed $value): void
+    {
+        $this->__set($offset, $value);
+    }
+
+    public function offsetExists(mixed $offset): bool
+    {
+        return $this->__isset($offset);
+    }
+
+    public function offsetUnset(mixed $offset): void
+    {
+        $this->__unset($offset);
     }
 
     public function __call(string $name, array $arguments)
     {
         $event = new MagicCallEvent($name, $arguments);
-        $callers = $this->callers[$name] ?? [];
+        $callers = self::findMagicHandlers($name, $this->callers);
         $fallback = fn () => parent::__call($name, $arguments);
 
-        return static::useMagic('__call', $event, $callers, $fallback);
+        return static::useMagic($event, $callers, $fallback);
     }
 
     public static function __callStatic(string $name, array $arguments)
     {
         $event = new MagicCallEvent($name, $arguments);
-        $callers = static::$staticCallers[$name] ?? [];
+        $callers = self::findMagicHandlers($name, static::$staticCallers);
         $fallback = fn () => parent::__callStatic($name, $arguments);
 
-        return static::useMagic('__callStatic', $event, $callers, $fallback);
+        return static::useMagic($event, $callers, $fallback);
     }
 
     public function __get(string $name)
     {
         $event = new MagicGetEvent($name);
-        $getters = $this->getters[$name] ?? [];
+        $getters = self::findMagicHandlers($name, $this->getters);
         $fallback = fn () => parent::__get($name);
 
-        return static::useMagic('__get', $event, $getters, $fallback);
+        return static::useMagic($event, $getters, $fallback);
     }
 
     public function __set(string $name, mixed $value)
     {
         $event = new MagicSetEvent($name, $value);
-        $setters = $this->setters[$name] ?? [];
+        $setters = self::findMagicHandlers($name, $this->setters);
         $fallback = fn () => parent::__set($name, $value);
 
-        return static::useMagic('__set', $event, $setters, $fallback);
+        return static::useMagic($event, $setters, $fallback);
     }
 
     public function __isset(string $name): bool
@@ -100,31 +156,55 @@ trait Magic
         }
     }
 
-    protected static function useMagic(string $type, MagicEvent $event, array $handlers, Closure $fallback)
+    /**
+     * Collects the handlers for a magic event based on the name of the member called.
+     *
+     * @param string $search
+     * @param MagicEventHandlers $handlers
+     * @return MagicEventHandler[]
+     */
+    protected static function findMagicHandlers(string $search, array $groups): array
     {
-        foreach ($handlers as $handler) {
-            $handler($event);
+        $found = [];
 
-            if (! $event->stopped) {
-                continue;
-            }
-
-            if ($event->hasOutput()) {
-                return $event->getOutput();
-            } else {
-                return;
+        foreach ($groups as $pattern => $handlers) {
+            if (fnmatch($pattern, $search)) {
+                $found = [...$found, ...$handlers];
             }
         }
 
-        if ($event->hasOutput()) {
-            return $event->getOutput();
-        }
+        return $found;
+    }
 
-        if (class_parents(self::class)) {
+    /**
+     * Attempts to use the handlers to process the event. If none of the handlers stop the event or
+     * provide output, the fallback closure is called.
+     *
+     * @param string $type
+     * @param MagicEvent $event
+     * @param MagicEventHandlers[] $handlers
+     * @param Closure $fallback
+     * @return void
+     */
+    protected static function useMagic(MagicEvent $event, array $handlers, Closure $fallback)
+    {
+        $fallback = (bool) class_parents(self::class)
+          ? $fallback
+          : fn () => throw new MagicException('No handlers found for '. $event->name);
+
+        if (! $handlers) {
             return $fallback();
         }
 
-        throw new MagicException('No '.$type.' handler found for '.static::class.'::'.$event->name);
+        foreach ($handlers as $handler) {
+            $handler($event);
+
+            if ($event->stopped) {
+              return $event->hasOutput() ? $event->getOutput() : null;
+            }
+        }
+
+        return $event->hasOutput() ? $event->getOutput() : null;
     }
 
     public function eachMagicMethod(string $attributeName, Closure $callback): void

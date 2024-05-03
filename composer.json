@@ -14,6 +14,9 @@
       "email": "alex@axebear.dev"
     }
   ],
+  "require": {
+    "php": ">=8.2"
+  },
   "require-dev": {
     "pestphp/pest": "^2.34",
     "psy/psysh": "@stable"

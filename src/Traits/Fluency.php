@@ -4,7 +4,7 @@ namespace AxeBear\Magic\Traits;
 
 use AxeBear\Magic\Attributes\Fluent;
 use AxeBear\Magic\Events\MagicCallEvent;
-use BadMethodCallException;
+use InvalidArgumentException;
 use ReflectionClass;
 
 trait Fluency
@@ -20,7 +20,7 @@ trait Fluency
         foreach ($props as $prop) {
             $this->onCall($prop->getName(), function (MagicCallEvent $event) use ($prop) {
                 if (! is_array($event->arguments) || count($event->arguments) > 1) {
-                    throw new BadMethodCallException("Method {$event->name} expects zero or one argument.");
+                    throw new InvalidArgumentException("Method {$event->name} expects zero or one argument.");
                 }
 
                 if (count($event->arguments) === 0) {
