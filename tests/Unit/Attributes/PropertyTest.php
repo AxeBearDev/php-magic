@@ -1,6 +1,7 @@
 <?php
 
 use AxeBear\Magic\Attributes\Property;
+use AxeBear\Magic\Exceptions\MagicException;
 use AxeBear\Magic\Traits\Properties;
 
 /**
@@ -11,8 +12,8 @@ use AxeBear\Magic\Traits\Properties;
  * @property string $title
  * @property stdClass $subtitle
  * @property-read string $greeting
- * @property-write string $farewell
  * @property-read string $message
+ * @property-write string $farewell
  */
 class Model
 {
@@ -22,6 +23,7 @@ class Model
 
     protected string $name = 'Axe';
 
+    #[Property(aliases: ['greeting', 'howdy', 'hello'])]
     protected string $greeting = 'Hello, World!';
 
     protected string $farewell = 'Goodbye, World!';
@@ -62,9 +64,17 @@ describe('#[Property]', function () {
     });
 
     test('access', function () {
+        $model = new Model();
+
+        $this->expectException(MagicException::class);
+        $model->farewell;
+
+        $this->expectException(MagicException::class);
+        // @php-ignore
+        $model->greeting = 'Hello, Axe!';
     });
 
-    test('transformations', function () {
+    test('transform properties', function () {
         $model = new Model();
 
         $model->title = 'axebear';
@@ -76,5 +86,11 @@ describe('#[Property]', function () {
 
         $rawSubtitle = $model->getRawValue('subtitle');
         expect($rawSubtitle)->toBe('{"key":"value"}');
+    });
+
+    test('aliases', function () {
+        $model = new Model();
+        expect($model->greeting)->toBe($model->hello);
+        expect($model->greeting)->toBe($model->howdy);
     });
 });

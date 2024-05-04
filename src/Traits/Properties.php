@@ -48,20 +48,24 @@ trait Properties
     protected function registerMagicMethod(ReflectionMethod $method, Property $config)
     {
         $aliases = $config->aliases ? $config->aliases : [$method->getName()];
-        $onGet = function (MagicGetEvent $event) use ($config, $method) {
-            // TODO: handle transforms for methods
 
+        if ($config->onGet || $config->onSet) {
+            throw new MagicException('Cannot use onGet or onSet with a magic method: '.$method->name);
+        }
+
+        $onGet = function (MagicGetEvent $event) use ($config, $method) {
             $args = $this->getArguments($method);
+            $get = fn () => $method->invoke($this, ...$args);
 
             if ($config->disableCache) {
-                $event->setOutput($method->invoke($this, ...$args));
-
-                return;
+                $output = $get();
+            } else {
+                $cacheKey = $this->cacheKey($method, $args);
+                $this->propertyCache[$cacheKey] ??= $get();
+                $output = $this->propertyCache[$cacheKey];
             }
 
-            $cacheKey = $this->cacheKey($method, $args);
-            $this->propertyCache[$cacheKey] ??= $method->invoke($this, ...$args);
-            $event->setOutput($this->propertyCache[$cacheKey]);
+            $event->setOutput($output);
         };
 
         foreach ($aliases as $alias) {
