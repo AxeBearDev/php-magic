@@ -2,6 +2,8 @@
 
 namespace AxeBear\Magic\Events;
 
+use Closure;
+
 /**
  * Represents an instance when a magic method is called
  *
@@ -52,8 +54,10 @@ class MagicEvent
     /**
      * @return T
      */
-    public function getOutput(): mixed
+    public function getOutput(?Closure $defaultValue = null): mixed
     {
-        return $this->hasOutput() ? $this->output : null;
+        $defaultValue ??= fn () => null;
+
+        return $this->hasOutput() ? $this->output : $defaultValue();
     }
 }

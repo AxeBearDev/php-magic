@@ -133,14 +133,14 @@ trait Magic
 
     public function __isset(string $name): bool
     {
-        return isset($this->getters[$name]) || parent::__isset($name);
+        return isset($this->getters[$name]) || (class_parents($this) && parent::__isset($name));
     }
 
     public function __unset(string $name): void
     {
         if (isset($this->setters[$name])) {
             unset($this->setters[$name]);
-        } else {
+        } elseif (class_parents($this)) {
             parent::__unset($name);
         }
     }
