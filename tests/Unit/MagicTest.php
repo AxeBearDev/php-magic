@@ -4,7 +4,7 @@ use AxeBear\Magic\Events\MagicGetEvent;
 use AxeBear\Magic\Events\MagicSetEvent;
 use AxeBear\Magic\Traits\Magic;
 
-class Model implements ArrayAccess
+class MagicTestModel implements ArrayAccess
 {
     use Magic;
 
@@ -25,7 +25,7 @@ describe('Magic', function () {
     ];
 
     test('getters and setters', function () use ($values) {
-        $model = new Model();
+        $model = new MagicTestModel();
         foreach ($values as $key => $value) {
             $model->$key = $value;
             expect($model->$key)->toBe($value);
@@ -33,7 +33,7 @@ describe('Magic', function () {
     });
 
     test('ArrayAccess', function () use ($values) {
-        $model = new Model();
+        $model = new MagicTestModel();
         foreach ($values as $key => $value) {
             $model[$key] = $value;
             expect($model[$key])->toBe($value);
