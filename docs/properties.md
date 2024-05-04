@@ -79,30 +79,32 @@ echo $model->repeatedName; // ernsternsternst
 
 ## Transforming Values
 
-You can also customize how a property is set or retrieved by adding a `#[Property]` attribute to the property. This attribute takes a `transform` parameter that is a callable that takes the value and returns the transformed value.
+You can also customize how a property is set or retrieved by adding a `#[Property]` attribute to the property. The `#[Property]` attribute accepts `onGet` and `onSet` parameters that allow modifying the value before setting it.
+
+Both `onSet` and `onGet` accept an array of callables that will be called in the order they are defined. The callables should accept the value as the first parameter and return the modified value. You may use either built-in PHP functions or custom class methods that are defined on the class.
 
 ```php
-use AxeBear\Magic\Traits\Properties;
-
 /**
- * @property string $name
- * @property int $count
- * @property-read string $defaultName
- * @property-write string $newName
+ * @property string $message
  */
 class Model {
   use Properties;
 
-  protected string $name;
+  #[Property(onSet: ['encode'], onGet: ['decode'])]
+  protected string $message;
 
-  protected int $count;
+  protected function encode(string $value): string
+  {
+      return base64_encode($value);
+  }
 
-  protected string $defaultName = 'leonora';
-
-  protected string $newName;
-
+  protected function decode(string $value): string
+  {
+      return base64_decode($value);
+  }
 }
 $model = new Model();
-echo $model->name; // Leonora
-echo $model->name('ernst'); // ernst
+$model->message = 'ernst';
+echo $model->message; // ernst
+echo $model->getRawValue('message'); // ZXJuc3Q=
 ```

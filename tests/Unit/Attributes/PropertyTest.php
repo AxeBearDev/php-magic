@@ -149,6 +149,8 @@ describe('Properties', function () {
 
         $model->unboundBool = 'true';
         expect($model->unboundBool)->toBe(true);
+        $model->unboundBool = '0';
+        expect($model->unboundBool)->toBe(false);
 
         $model->unboundArray = '1';
         expect($model->unboundArray)->toBe(['1']);
