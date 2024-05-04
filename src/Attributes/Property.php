@@ -36,6 +36,11 @@ class Property
     ) {
     }
 
+    public function aliases(string $default): array
+    {
+        return $this->aliases ?: [$default];
+    }
+
     public function readable(): bool
     {
         return $this->access & self::READ;

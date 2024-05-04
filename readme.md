@@ -19,8 +19,8 @@ This package provides powerful utilities for reusing code and adding functionali
 
 This package uses magic methods to add members that aren't exclicitly defined in your classes. Be sure to add type hints to your class. Otherwise, your IDE of choice won't give you hints about the `@property` or `@method` members you've added to your class.
 
-### [Transforms](docs/transforms.md)
-Apply changes to class properties when they are set or retrieved.
+### [Properties](docs/properties.md)
+Inspects your class documentation for `@property`, `@property-read`, and `@property-write` tags and adds the corresponding magic methods to your class so that those properties work. You can optionally add configuration to any of the properties with the `#[Property]` attribute.
 
 ### [Fluency](docs/fluency.md)
 Add fluent methods for class properties so your code can flow elegantly.

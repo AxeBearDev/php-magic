@@ -7,6 +7,7 @@ use AxeBear\Magic\Events\MagicGetEvent;
 use AxeBear\Magic\Events\MagicSetEvent;
 use AxeBear\Magic\Exceptions\MagicException;
 use Closure;
+use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagNode;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
@@ -18,12 +19,16 @@ trait Properties
     use MakesClosures;
     use ParsesDocs;
 
-    protected array $registeredProperties = [];
+    private array $propertyCache = [];
 
-    protected array $propertyCache = [];
+    private array $unboundProperties = [];
 
     public function getRawValue(string $name, ?Closure $default = null)
     {
+        if (isset($this->unboundProperties[$name])) {
+            return $this->unboundProperties[$name];
+        }
+
         $reflection = new ReflectionClass($this);
         $default ??= fn () => null;
         $prop = $reflection->hasProperty($name) ? $reflection->getProperty($name) : null;
@@ -72,8 +77,6 @@ trait Properties
         foreach ($aliases as $alias) {
             $this->onGet($alias, $onGet);
         }
-
-        $this->registeredProperties[$method->name] = $config;
     }
 
     protected function registerMagicProperty(ReflectionProperty $property, Property $config)
@@ -111,8 +114,36 @@ trait Properties
                 );
             }
         }
+    }
 
-        $this->registeredProperties[$property->name] = $config;
+    /**
+     * Registers a property this isn't bound to a class method or property.
+     *
+     * @return void
+     */
+    protected function registerUnboundProperty(PhpDocTagNode $tag, Property $config)
+    {
+        // TODO: Add type coercion
+        $name = ltrim($tag->value->propertyName, '$');
+        if ($config->readable()) {
+            $this->onGet(
+                $name,
+                function (MagicGetEvent $event) use ($name, $config) {
+                    $value = $this->valueAfterTransforms($this->getRawValue($name), $config->onGet);
+                    $event->setOutput($value);
+                }
+            );
+        }
+
+        if ($config->writable()) {
+            $this->onSet(
+                $name,
+                function (MagicSetEvent $event) use ($name, $config) {
+                    $value = $this->valueAfterTransforms($event->value, $config->onSet);
+                    $this->unboundProperties[$name] = $value;
+                }
+            );
+        }
     }
 
     protected function registerClassProperties()
@@ -145,7 +176,7 @@ trait Properties
         foreach ($tags as $tag) {
             $name = ltrim($tag->value->propertyName, '$');
 
-            if ($this->registeredProperties[$name] ?? false) {
+            if ($this->hasAnyMagic($name)) {
                 // Already registered. Yay!
                 continue;
             }
@@ -166,8 +197,8 @@ trait Properties
                 continue;
             }
 
-            // If we can't find a matching method or property, that's an error!
-            throw new MagicException('No member named '.$name.' to use as a property. Check your docblock tags.');
+            // If we can't find a matching method or property, track the value in the properties array
+            $this->registerUnboundProperty($tag, $config);
         }
     }
 

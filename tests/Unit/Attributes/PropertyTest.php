@@ -10,6 +10,7 @@ use AxeBear\Magic\Traits\Properties;
  * @property bool $leaving
  * @property string $name
  * @property string $title
+ * @property int $unbound
  * @property stdClass $subtitle
  * @property-read string $greeting
  * @property-read string $message
@@ -94,5 +95,13 @@ describe('#[Property]', function () {
         $model = new Model();
         expect($model->greeting)->toBe($model->hello);
         expect($model->greeting)->toBe($model->howdy);
+    });
+
+    test('unbound properties', function () {
+        $model = new Model();
+        expect($model->unbound)->toBeNull();
+        $model->unbound = 1;
+        expect($model->unbound)->toBe(1);
+        expect($model->getRawValue('unbound'))->toBe(1);
     });
 });

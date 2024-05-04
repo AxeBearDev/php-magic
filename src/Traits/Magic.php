@@ -33,6 +33,31 @@ trait Magic
     /* @var MagicEventHandlers */
     private array $setters = [];
 
+    public static function hasMagicStaticCaller(string $name): bool
+    {
+        return isset(static::$staticCallers[$name]);
+    }
+
+    public function hasAnyMagic(string $name): bool
+    {
+        return $this->hasMagicGetter($name) || $this->hasMagicSetter($name) || $this->hasMagicCaller($name);
+    }
+
+    public function hasMagicGetter(string $name): bool
+    {
+        return isset($this->getters[$name]);
+    }
+
+    public function hasMagicSetter(string $name): bool
+    {
+        return isset($this->setters[$name]);
+    }
+
+    public function hasMagicCaller(string $name): bool
+    {
+        return isset($this->callers[$name]);
+    }
+
     /**
      * Register handlers for calls to __call with names that match the specified pattern. Patterns
      * are matched using the fnmatch function.
