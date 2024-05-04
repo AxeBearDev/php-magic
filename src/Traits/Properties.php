@@ -125,6 +125,8 @@ trait Properties
     {
         // TODO: Add type coercion
         $name = ltrim($tag->value->propertyName, '$');
+        $type = $tag->value->type?->name ?? null;
+
         if ($config->readable()) {
             $this->onGet(
                 $name,
@@ -138,12 +140,22 @@ trait Properties
         if ($config->writable()) {
             $this->onSet(
                 $name,
-                function (MagicSetEvent $event) use ($name, $config) {
+                function (MagicSetEvent $event) use ($name, $type, $config) {
+                    if ($type) {
+                        $event->value = $this->coerceType($event->value, $type);
+                    }
                     $value = $this->valueAfterTransforms($event->value, $config->onSet);
                     $this->unboundProperties[$name] = $value;
                 }
             );
         }
+    }
+
+    public function coerceType(mixed $value, string $type): mixed
+    {
+        settype($value, $type);
+
+        return $value;
     }
 
     protected function registerClassProperties()

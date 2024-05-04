@@ -7,22 +7,37 @@ use AxeBear\Magic\Traits\Properties;
 /**
  * Sample class used for testing the #[Property] attribute and @property tag.
  *
- * @property bool $leaving
+ * @property int $count
  * @property string $name
+ * @property-read string $repeatedName
+ * @property bool $leaving
  * @property string $title
- * @property int $unbound
  * @property stdClass $subtitle
  * @property-read string $greeting
  * @property-read string $message
  * @property-write string $farewell
+ * @property-read string $uncachedName
+ * @property int $unboundNumber
+ * @property string $unboundString
+ * @property bool $unboundBool
+ * @property array $unboundArray
+ * @property object $unboundObject
+ * @property float $unboundFloat
  */
 class Model
 {
     use Properties;
 
+    protected int $count = 0;
+
     protected bool $leaving = false;
 
     protected string $name = 'Axe';
+
+    protected function repeatedName(int $count, string $name): string
+    {
+        return str_repeat($name, $count);
+    }
 
     #[Property(aliases: ['greeting', 'howdy', 'hello'])]
     protected string $greeting = 'Hello, World!';
@@ -41,10 +56,16 @@ class Model
     {
         return $leaving ? $this->farewell : $this->greeting;
     }
+
+    #[Property(disableCache: true)]
+    protected function uncachedName(): string
+    {
+        return $this->name;
+    }
 }
 
-describe('#[Property]', function () {
-    test('basic properties', function () {
+describe('Properties', function () {
+    test('basic getters and setters', function () {
         $model = new Model();
         expect($model->name)->toBe('Axe');
         expect($model->leaving)->toBe(false);
@@ -56,7 +77,7 @@ describe('#[Property]', function () {
         expect($model->leaving)->toBe(true);
     });
 
-    test('methods as properties', function () {
+    test('calculated methods', function () {
         $model = new Model();
 
         $model->leaving = true;
@@ -64,6 +85,10 @@ describe('#[Property]', function () {
 
         $model->leaving = false;
         expect($model->message)->toBe('Hello, World!');
+
+        $model->count = 3;
+        $model->name = 'X';
+        expect($model->repeatedName)->toBe('XXX');
     });
 
     test('access', function () {
@@ -77,7 +102,7 @@ describe('#[Property]', function () {
         $model->greeting = 'Hello, Axe!';
     });
 
-    test('transform properties', function () {
+    test('transformed properties', function () {
         $model = new Model();
 
         $model->title = 'axebear';
@@ -91,6 +116,14 @@ describe('#[Property]', function () {
         expect($rawSubtitle)->toBe('{"key":"value"}');
     });
 
+    test('uncached properties', function () {
+        $model = new Model();
+        $model->name = 'Axe';
+        expect($model->uncachedName)->toBe('Axe');
+        $model->name = 'Bear';
+        expect($model->uncachedName)->toBe('Bear');
+    });
+
     test('aliases', function () {
         $model = new Model();
         expect($model->greeting)->toBe($model->hello);
@@ -99,9 +132,34 @@ describe('#[Property]', function () {
 
     test('unbound properties', function () {
         $model = new Model();
-        expect($model->unbound)->toBeNull();
-        $model->unbound = 1;
-        expect($model->unbound)->toBe(1);
-        expect($model->getRawValue('unbound'))->toBe(1);
+        expect($model->unboundNumber)->toBeNull();
+        $model->unboundNumber = 1;
+        expect($model->unboundNumber)->toBe(1);
+        expect($model->getRawValue('unboundNumber'))->toBe(1);
+    });
+
+    test('type conversion for unbound properties', function () {
+        $model = new Model();
+
+        $model->unboundNumber = '1';
+        expect($model->unboundNumber)->toBe(1);
+
+        $model->unboundString = 1;
+        expect($model->unboundString)->toBe('1');
+
+        $model->unboundBool = 'true';
+        expect($model->unboundBool)->toBe(true);
+
+        $model->unboundArray = '1';
+        expect($model->unboundArray)->toBe(['1']);
+
+        $model->unboundObject = '["key":"value"]';
+        expect($model->unboundObject)->toBeInstanceOf(stdClass::class);
+
+        $model->unboundFloat = '1.1';
+        expect($model->unboundFloat)->toBe(1.1);
+
+        $model->unboundFloat = '1';
+        expect($model->unboundFloat)->toBe(1.0);
     });
 });
