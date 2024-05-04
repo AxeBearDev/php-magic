@@ -108,3 +108,23 @@ $model->message = 'ernst';
 echo $model->message; // ernst
 echo $model->getRawValue('message'); // ZXJuc3Q=
 ```
+
+## Fluent Getters and Setters
+
+In addition to mapping properties, you can also create magic getter and setter methods using the `@method` tag. This is useful when you want to provide a fluent interface for your class. The `Properties` trait will automatically add the magic methods to your class when it sees the `@method` tag with either zero or one parameters.
+
+If the `@method` tag includes one parameter, the `Properties` trait will add a setter method. If the `@method` tag includes zero parameters, the `Properties` trait will add a getter method.
+
+```php
+/**
+ * @method string name()
+ * @method self name(string $name)
+ */
+class Model {
+  use Properties;
+}
+
+$model = new Model();
+$model->name('ernst');
+echo $model->name(); // ernst
+```

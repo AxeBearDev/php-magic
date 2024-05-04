@@ -17,12 +17,23 @@ use AxeBear\Magic\Traits\Properties;
  * @property-read string $message
  * @property-write string $farewell
  * @property-read string $uncachedName
+ *
+ * // Unbound properties
  * @property int $unboundNumber
  * @property string $unboundString
  * @property bool $unboundBool
  * @property array $unboundArray
  * @property object $unboundObject
  * @property float $unboundFloat
+ *
+ * // Fluent methods
+ *
+ * @method self count(int $value)
+ * @method int count()
+ * @method string name()
+ * @method self title(string $value)
+ * @method self unboundString(string $value)
+ * @method string unboundString()
  */
 class Model
 {
@@ -163,5 +174,29 @@ describe('Properties', function () {
 
         $model->unboundFloat = '1';
         expect($model->unboundFloat)->toBe(1.0);
+    });
+
+    test('fluent methods', function () {
+        $model = new Model();
+        $model->count(1)->count(2)->count(3);
+        expect($model->count)->toBe(3);
+
+        $model->count = 0;
+        expect($model->count())->toBe(0);
+
+        expect($model->name())->toBe('Axe');
+
+        expect($model->unboundString())->toBeNull();
+        expect($model->unboundString('AxeBear'))->toBeInstanceOf(Model::class);
+        expect($model->unboundString())->toBe('AxeBear');
+
+        $this->expectException(InvalidArgumentException::class);
+        $model->name(1);
+
+        $this->expectException(InvalidArgumentException::class);
+        $model->name(1, 2);
+
+        $this->expectException(InvalidArgumentException::class);
+        $model->title;
     });
 });

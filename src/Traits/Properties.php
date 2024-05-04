@@ -3,10 +3,12 @@
 namespace AxeBear\Magic\Traits;
 
 use AxeBear\Magic\Attributes\Property;
+use AxeBear\Magic\Events\MagicCallEvent;
 use AxeBear\Magic\Events\MagicGetEvent;
 use AxeBear\Magic\Events\MagicSetEvent;
 use AxeBear\Magic\Exceptions\MagicException;
 use Closure;
+use InvalidArgumentException;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagNode;
 use ReflectionClass;
 use ReflectionMethod;
@@ -175,6 +177,10 @@ trait Properties
             $doc->getTagsByName('@property-write'),
             new Property(access: Property::WRITE)
         );
+
+        $this->registerFluentMethods(
+            $doc->getTagsByName('@method')
+        );
     }
 
     /**
@@ -211,6 +217,51 @@ trait Properties
 
             // If we can't find a matching method or property, track the value in the properties array
             $this->registerUnboundProperty($tag, $config);
+        }
+    }
+
+    protected function registerFluentMethods(array $tags): void
+    {
+        // Group the tags by method name, since there could be a getter and a setter
+        $groups = [];
+        foreach ($tags as $tag) {
+            $name = $tag->value->methodName;
+            $groups[$name] ??= ['set' => false, 'get' => false];
+
+            $isSetter = count($tag->value->parameters) === 1;
+            $isGetter = count($tag->value->parameters) === 0;
+
+            $groups[$name] = [
+                'set' => $groups[$name]['set'] || $isSetter,
+                'get' => $groups[$name]['get'] || $isGetter,
+            ];
+        }
+
+        foreach ($groups as $name => $methods) {
+            $this->onCall(
+                $name,
+                function (MagicCallEvent $event) use ($methods) {
+                    $isSetting = count($event->arguments) === 1;
+                    $isGetting = count($event->arguments) === 0;
+
+                    if ($isSetting && ! $methods['set']) {
+                        throw new InvalidArgumentException('Method '.$event->name.' is not writable');
+                    }
+
+                    if ($isGetting && ! $methods['get']) {
+                        throw new InvalidArgumentException('Method '.$event->name.' is not readable');
+                    }
+
+                    if ($isSetting && $methods['set']) {
+                        $this->__set($event->name, $event->arguments[0]);
+                        $event->setOutput($this);
+                    } elseif ($isGetting && $methods['get']) {
+                        $event->setOutput($this->__get($event->name));
+                    } else {
+                        throw new InvalidArgumentException('Invalid number of arguments for '.$event->name);
+                    }
+                }
+            );
         }
     }
 
