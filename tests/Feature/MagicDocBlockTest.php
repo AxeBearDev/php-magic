@@ -1,11 +1,11 @@
 <?php
 
-use AxeBear\Magic\Attributes\Property;
+use AxeBear\Magic\Attributes\MagicProperty;
 use AxeBear\Magic\Exceptions\MagicException;
-use AxeBear\Magic\Traits\Properties;
+use AxeBear\Magic\Traits\MagicDocBlock;
 
 /**
- * Sample class used for testing the #[Property] attribute and @property tag.
+ * Sample class used for testing the #[MagicProperty] attribute and @property tag.
  *
  * @property int $count
  * @property string $name
@@ -37,7 +37,7 @@ use AxeBear\Magic\Traits\Properties;
  */
 class Model
 {
-    use Properties;
+    use MagicDocBlock;
 
     protected int $count = 0;
 
@@ -50,17 +50,17 @@ class Model
         return str_repeat($name, $count);
     }
 
-    #[Property(aliases: ['greeting', 'howdy', 'hello'])]
+    #[MagicProperty(aliases: ['greeting', 'howdy', 'hello'])]
     protected string $greeting = 'Hello, World!';
 
     protected string $farewell = 'Goodbye, World!';
 
-    #[Property(onSet: ['strtoupper'])]
+    #[MagicProperty(onSet: ['strtoupper'])]
     protected string $title = '';
 
     protected string $slug = '';
 
-    #[Property(onSet: ['json_encode'], onGet: ['json_decode'])]
+    #[MagicProperty(onSet: ['json_encode'], onGet: ['json_decode'])]
     protected string $subtitle = '';
 
     protected function message(bool $leaving): string
@@ -68,7 +68,7 @@ class Model
         return $leaving ? $this->farewell : $this->greeting;
     }
 
-    #[Property(disableCache: true)]
+    #[MagicProperty(disableCache: true)]
     protected function uncachedName(): string
     {
         return $this->name;

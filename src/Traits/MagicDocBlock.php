@@ -2,7 +2,7 @@
 
 namespace AxeBear\Magic\Traits;
 
-use AxeBear\Magic\Attributes\Property;
+use AxeBear\Magic\Attributes\MagicProperty;
 use AxeBear\Magic\Events\MagicCallEvent;
 use AxeBear\Magic\Events\MagicGetEvent;
 use AxeBear\Magic\Events\MagicSetEvent;
@@ -15,7 +15,7 @@ use ReflectionMethod;
 use ReflectionParameter;
 use ReflectionProperty;
 
-trait Properties
+trait MagicDocBlock
 {
     use Magic;
     use MakesClosures;
@@ -38,22 +38,22 @@ trait Properties
         return $prop ? $prop->getValue($this) : $default();
     }
 
-    protected function bootProperties()
+    protected function bootMagicDocBlock()
     {
         $this->eachMagicProperty(
-            Property::class,
+            MagicProperty::class,
             fn ($property, $config) => $this->registerMagicProperty($property, $config)
         );
 
         $this->eachMagicMethod(
-            Property::class,
+            MagicProperty::class,
             fn ($method, $config) => $this->registerMagicMethod($method, $config)
         );
 
         $this->registerClassProperties();
     }
 
-    protected function registerMagicMethod(ReflectionMethod $method, Property $config)
+    protected function registerMagicMethod(ReflectionMethod $method, MagicProperty $config)
     {
         $aliases = $config->aliases ? $config->aliases : [$method->getName()];
 
@@ -81,7 +81,7 @@ trait Properties
         }
     }
 
-    protected function registerMagicProperty(ReflectionProperty $property, Property $config)
+    protected function registerMagicProperty(ReflectionProperty $property, MagicProperty $config)
     {
         if ($property->isPublic()) {
             throw new MagicException('Magic is not available for public properties: '.$property->name);
@@ -123,7 +123,7 @@ trait Properties
      *
      * @return void
      */
-    protected function registerUnboundProperty(PhpDocTagNode $tag, Property $config)
+    protected function registerUnboundProperty(PhpDocTagNode $tag, MagicProperty $config)
     {
         // TODO: Add type coercion
         $name = ltrim($tag->value->propertyName, '$');
@@ -165,17 +165,17 @@ trait Properties
         $doc = $this->getDocNode();
         $this->registerTaggedProperties(
             $doc->getTagsByName('@property'),
-            new Property(access: Property::READ_WRITE)
+            new MagicProperty(access: MagicProperty::READ_WRITE)
         );
 
         $this->registerTaggedProperties(
             $doc->getTagsByName('@property-read'),
-            new Property(access: Property::READ)
+            new MagicProperty(access: MagicProperty::READ)
         );
 
         $this->registerTaggedProperties(
             $doc->getTagsByName('@property-write'),
-            new Property(access: Property::WRITE)
+            new MagicProperty(access: MagicProperty::WRITE)
         );
 
         $this->registerFluentMethods(
@@ -188,7 +188,7 @@ trait Properties
      *
      * @param  \PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagNode[]  $tags
      */
-    protected function registerTaggedProperties(array $tags, Property $config): void
+    protected function registerTaggedProperties(array $tags, MagicProperty $config): void
     {
         $reflection = new ReflectionClass($this);
         foreach ($tags as $tag) {
@@ -279,11 +279,11 @@ trait Properties
     {
         $name = $param->getName();
 
-        if (method_exists($this, $name)) {
+        if (method_exists($this, $name) || $this->hasMagicCaller($name)) {
             return $this->{$name}();
         }
 
-        if (property_exists($this, $name)) {
+        if (property_exists($this, $name) || $this->hasMagicGetter($name)) {
             return $this->{$name};
         }
 

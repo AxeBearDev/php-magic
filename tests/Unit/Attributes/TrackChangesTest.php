@@ -1,9 +1,9 @@
 <?php
 
+use AxeBear\Magic\Attributes\MagicProperty;
 use AxeBear\Magic\Attributes\TrackChanges;
-use AxeBear\Magic\Attributes\Transform;
+use AxeBear\Magic\Traits\MagicDocBlock;
 use AxeBear\Magic\Traits\TracksChanges;
-use AxeBear\Magic\Traits\Transforms;
 
 describe('#[TrackChanges]', function () {
     test('class-level', function () {
@@ -63,7 +63,6 @@ describe('#[TrackChanges]', function () {
     });
 
     test('rollback', function () {
-        #[TrackChanges]
         class RollbackUser
         {
             use TracksChanges;
@@ -89,17 +88,20 @@ describe('#[TrackChanges]', function () {
         expect($user->lastName)->toBe('Doe');
     });
 
-    test('track with transform', function () {
-        #[TrackChanges]
+    test('track with properties', function () {
+        /**
+         * @property string $firstName;
+         * @property string $lastName;
+         */
         class TransformUser
         {
-            use Transforms;
+            use MagicDocBlock;
             use TracksChanges;
 
-            #[Transform(onSet: ['strtoupper'])]
+            #[MagicProperty(onSet: ['strtoupper'])]
             protected string $firstName = 'Jean';
 
-            #[Transform(onGet: ['strtoupper'])]
+            #[MagicProperty(onGet: ['strtoupper'])]
             protected string $lastName = 'Doe';
         }
 

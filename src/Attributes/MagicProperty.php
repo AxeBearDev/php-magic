@@ -5,7 +5,7 @@ namespace AxeBear\Magic\Attributes;
 use Attribute;
 
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_PROPERTY)]
-class Property
+class MagicProperty
 {
     const READ = 1;
 

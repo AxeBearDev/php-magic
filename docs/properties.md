@@ -1,6 +1,6 @@
 # Properties
 
-Inspects your class documentation for `@property`, `@property-read`, and `@property-write` tags and adds the corresponding magic methods to your class so that those properties work. You can optionally add configuration to any of the properties with the `#[Property]` attribute.
+Inspects your class documentation for `@property`, `@property-read`, and `@property-write` tags and adds the corresponding magic methods to your class so that those properties work. You can optionally add configuration to any of the properties with the `#[MagicProperty]` attribute.
 
 ## Basic Usage
 
@@ -12,7 +12,7 @@ At its simplest when you include `@property` tags in your class documentation, t
  * @property int $count
  */
 class Model {
-  use Properties;
+  use MagicDocBlock;
 }
 
 $model = new Model();
@@ -34,7 +34,7 @@ You can also define read-only and write-only properties with the `@property-read
  * @property-write string $newName
  */
 class Model {
-  use Properties;
+  use MagicDocBlock;
 
   protected string $defaultName = 'leonora';
 
@@ -59,7 +59,7 @@ If the calculation has any dependencies on other class values, you should add th
  * @property-read string $repeatedName
  */
 class Model {
-  use Properties;
+  use MagicDocBlock;
 
   protected string $name;
 
@@ -79,7 +79,7 @@ echo $model->repeatedName; // ernsternsternst
 
 ## Transforming Values
 
-You can also customize how a property is set or retrieved by adding a `#[Property]` attribute to the property. The `#[Property]` attribute accepts `onGet` and `onSet` parameters that allow modifying the value before setting it.
+You can also customize how a property is set or retrieved by adding a `#[MagicProperty]` attribute to the property. The `#[MagicProperty]` attribute accepts `onGet` and `onSet` parameters that allow modifying the value before setting it.
 
 Both `onSet` and `onGet` accept an array of callables that will be called in the order they are defined. The callables should accept the value as the first parameter and return the modified value. You may use either built-in PHP functions or custom class methods that are defined on the class.
 
@@ -88,9 +88,9 @@ Both `onSet` and `onGet` accept an array of callables that will be called in the
  * @property string $message
  */
 class Model {
-  use Properties;
+  use MagicDocBlock;
 
-  #[Property(onSet: ['encode'], onGet: ['decode'])]
+  #[MagicProperty(onSet: ['encode'], onGet: ['decode'])]
   protected string $message;
 
   protected function encode(string $value): string
@@ -121,7 +121,7 @@ If the `@method` tag includes one parameter, the `Properties` trait will add a s
  * @method self name(string $name)
  */
 class Model {
-  use Properties;
+  use MagicDocBlock;
 }
 
 $model = new Model();

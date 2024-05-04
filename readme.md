@@ -1,6 +1,45 @@
 # PHP Magic
 
-This PHP package uses magic methods to provide a composable way to add functionality to your classes via custom attributes.
+This PHP package provides utilities for adding magic properties and methods to your classes using custom attributes and docblocks.
+
+Check it out. It's magic!
+
+```php
+use AxeBear\Magic\Traits\MagicDocBlock;
+
+/**
+ * This example class shows how class comments
+ * can be used to define magic properties and methods.
+ * 
+ * @property string $name
+ * @method self name(string $name)
+ * @method string name()
+ * 
+ * @property int $count
+ * @method self count(int $count)
+ * @method int count()
+ * 
+ * @property string $repeatedName
+ * @property-read string $readonlyValue
+ * @property-write string $writeOnlyValue
+ */
+class Model {
+  use MagicDocBlock;
+
+  protected string $readonlyValue = 'Hello, World!';
+
+  public function repeatedName(string $name, int $count): string {
+    return str_repeat($name, $count);
+  }
+}
+
+$model = new Model();
+$model->name('Axe Bear')->count(1);
+echo $model->name(); // Axe Bear
+echo $model->count(); // 1
+echo $model->repeatedName; // Axe Bear
+
+```
 
 ## Installation
 
@@ -17,13 +56,11 @@ composer require spleenboy/php-magic
 
 This package provides powerful utilities for reusing code and adding functionality to your classes. Under the hood, it takes advantange of [PHP's magic methods](https://www.php.net/manual/en/language.oop5.magic.php) to provide a composable way to add functionality to your classes via custom [attributes](https://www.php.net/manual/en/class.attribute).
 
-This package uses magic methods to add members that aren't exclicitly defined in your classes. Be sure to add type hints to your class. Otherwise, your IDE of choice won't give you hints about the `@property` or `@method` members you've added to your class.
+This package uses magic methods to add members that aren't exclicitly defined in your classes.
 
 ### [Properties](docs/properties.md)
-Inspects your class documentation for `@property`, `@property-read`, and `@property-write` tags and adds the corresponding magic methods to your class so that those properties work. You can optionally add configuration to any of the properties with the `#[Property]` attribute.
 
-### [Fluency](docs/fluency.md)
-Add fluent methods for class properties so your code can flow elegantly.
+The `Properties` trait adds support in your classes to define magic properties and methods in the docblock for your class. You can further customize these using the `#[MagicProperty]` attribute.
 
 ### [Track Changes](docs/track-changes.md)
 Track changes to protected class properties in a class.
