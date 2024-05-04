@@ -15,6 +15,7 @@ use ReflectionProperty;
 trait Properties
 {
     use Magic;
+    use MakesClosures;
     use ParsesDocs;
 
     protected array $registeredProperties = [];
@@ -88,10 +89,10 @@ trait Properties
                 $this->onGet(
                     $alias,
                     function (MagicGetEvent $event) use ($property, $config) {
-                        $value = $event->getOutput(fn () => $property->getValue($this));
-                        foreach ($config->onGet as $transform) {
-                            $value = $transform($value);
-                        }
+                        $value = $this->valueAfterTransforms(
+                            $event->getOutput(fn () => $property->getValue($this)),
+                            $config->onGet
+                        );
                         $event->setOutput($value);
                     }
                 );
@@ -101,10 +102,10 @@ trait Properties
                 $this->onSet(
                     $alias,
                     function (MagicSetEvent $event) use ($property, $config) {
-                        $value = $event->getOutput(fn () => $event->value);
-                        foreach ($config->onSet as $transform) {
-                            $value = $transform($value);
-                        }
+                        $value = $this->valueAfterTransforms(
+                            $event->getOutput(fn () => $event->value),
+                            $config->onSet
+                        );
                         $property->setValue($this, $value);
                     }
                 );
@@ -170,7 +171,7 @@ trait Properties
         }
     }
 
-    protected function getArguments(ReflectionMethod $method): array
+    private function getArguments(ReflectionMethod $method): array
     {
         $params = $method->getParameters() ?? [];
 
@@ -180,7 +181,7 @@ trait Properties
         );
     }
 
-    protected function valueFromInstance(ReflectionParameter $param): mixed
+    private function valueFromInstance(ReflectionParameter $param): mixed
     {
         $name = $param->getName();
 
@@ -192,11 +193,26 @@ trait Properties
             return $this->{$name};
         }
 
-        throw new MagicException('Could not find class member '.$name.' to use as a parameter for the Getter method');
+        throw new MagicException('Could not find class member '.$name.' for use as a parameter');
     }
 
-    protected function cacheKey(ReflectionMethod $method, array $args): string
+    private function cacheKey(ReflectionMethod $method, array $args): string
     {
         return $this::class.'::'.$method->getName().serialize($args);
+    }
+
+    /**
+     * Applies a list of transformers to a value and return the result
+     *
+     * @param  array<callable(mixed): mixed>  $transformers
+     */
+    private function valueAfterTransforms(mixed $value, array $transformers = []): mixed
+    {
+        foreach ($transformers as $transformer) {
+            $transformer = $this->makeClosure($this, $transformer);
+            $value = $transformer($value);
+        }
+
+        return $value;
     }
 }

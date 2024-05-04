@@ -31,6 +31,8 @@ class Model
     #[Property(onSet: ['strtoupper'])]
     protected string $title = '';
 
+    protected string $slug = '';
+
     #[Property(onSet: ['json_encode'], onGet: ['json_decode'])]
     protected string $subtitle = '';
 

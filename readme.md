@@ -25,11 +25,5 @@ Apply changes to class properties when they are set or retrieved.
 ### [Fluency](docs/fluency.md)
 Add fluent methods for class properties so your code can flow elegantly.
 
-### [Getters](docs/getters.md)
-Create magic class properties for class methods.
-
-### [Computes](docs/computes.md)
-An extension of the `#[Getter]` attribute that supports arguments in the getter method.
-
 ### [Track Changes](docs/track-changes.md)
 Track changes to protected class properties in a class.

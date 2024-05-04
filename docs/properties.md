@@ -1,4 +1,4 @@
-# Computes
+# Properties
 
 This is a fancier version of the `#[Getter]` attribute and trait that supports arguments in the getter method. If `useCache` is set to `true`, the method and argument values will be used to cache the result of the computation and return it on subsequent calls.
 
