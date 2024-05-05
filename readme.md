@@ -13,20 +13,14 @@ use AxeBear\Magic\Traits\MagicDocBlock;
  * 
  * @property string $name
  * @method self name(string $name)
- * @method string name()
  * 
  * @property int $count
  * @method self count(int $count)
- * @method int count()
  * 
  * @property string $repeatedName
- * @property-read string $readonlyValue
- * @property-write string $writeOnlyValue
  */
 class Model {
   use MagicDocBlock;
-
-  protected string $readonlyValue = 'Hello, World!';
 
   public function repeatedName(string $name, int $count): string {
     return str_repeat($name, $count);
@@ -35,8 +29,8 @@ class Model {
 
 $model = new Model();
 $model->name('Axe Bear')->count(1);
-echo $model->name(); // Axe Bear
-echo $model->count(); // 1
+echo $model->name; // Axe Bear
+echo $model->count; // 1
 echo $model->repeatedName; // Axe Bear
 
 ```

@@ -55,7 +55,7 @@ class Model
 
     protected string $farewell = 'Goodbye, World!';
 
-    #[MagicProperty(onSet: ['strtoupper'])]
+    #[MagicProperty(onSet: ['customUpperCase'])]
     protected string $title = '';
 
     protected string $slug = '';
@@ -72,6 +72,11 @@ class Model
     protected function uncachedName(): string
     {
         return $this->name;
+    }
+
+    protected function customUpperCase(string $value): string
+    {
+        return strtoupper($value);
     }
 }
 
