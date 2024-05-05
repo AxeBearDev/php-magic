@@ -114,7 +114,12 @@ describe('Properties', function () {
         $model->farewell;
 
         $this->expectException(MagicException::class);
-        // @php-ignore
+
+        /**
+         * @php-ignore
+         *
+         * @disregard
+         */
         $model->greeting = 'Hello, Axe!';
     });
 
