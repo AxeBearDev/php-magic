@@ -44,7 +44,7 @@ class MagicEvent
     /**
      * @param  T  $output
      */
-    public function setOutput(mixed $output): self
+    public function setOutput(mixed $output): static
     {
         $this->output = $output;
 

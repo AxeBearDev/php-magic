@@ -17,6 +17,7 @@ use ReflectionProperty;
 
 trait MagicDocBlock
 {
+    use BootsTraits;
     use Magic;
     use MakesClosures;
     use ParsesDocs;

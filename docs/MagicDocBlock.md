@@ -1,10 +1,10 @@
-# Properties
+# MagicDocBlock
 
-Inspects your class documentation for `@property`, `@property-read`, and `@property-write` tags and adds the corresponding magic methods to your class so that those properties work. You can optionally add configuration to any of the properties with the `#[MagicProperty]` attribute.
+This trait inspects your class documentation for `@property`, `@property-read`, and `@property-write` tags and adds the corresponding magic methods to your class so that those properties work. You can optionally add configuration to any of the properties with the `#[MagicProperty]` attribute.
 
 ## Basic Usage
 
-At its simplest when you include `@property` tags in your class documentation, the `Properties` trait will add a getter and setter for the property.
+At its simplest when you include `@property` tags in your class documentation, the `MapDocBlock` trait will add a getter and setter for the property.
 
 ```php
 /**
@@ -111,9 +111,9 @@ echo $model->getRawValue('message'); // ZXJuc3Q=
 
 ## Fluent Getters and Setters
 
-In addition to mapping properties, you can also create magic getter and setter methods using the `@method` tag. This is useful when you want to provide a fluent interface for your class. The `Properties` trait will automatically add the magic methods to your class when it sees the `@method` tag with either zero or one parameters.
+In addition to mapping properties, you can also create magic getter and setter methods using the `@method` tag in your class documentation. This is useful when you want to provide a fluent interface for your class. The `MapDocBlock` trait will automatically add the magic methods to your class when it sees the `@method` tag with either zero or one parameters.
 
-If the `@method` tag includes one parameter, the `Properties` trait will add a setter method. If the `@method` tag includes zero parameters, the `Properties` trait will add a getter method.
+If the `@method` tag includes one parameter, the `MapDocBlock` trait will add a setter method. If the `@method` tag includes zero parameters, the `MapDocBlock` trait will add a getter method.
 
 ```php
 /**

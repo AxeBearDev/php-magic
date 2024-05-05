@@ -10,7 +10,7 @@ class MagicTestModel implements ArrayAccess
 
     protected array $data = [];
 
-    protected function traitsBooted(): void
+    public function __construct()
     {
         $this->onGet('*', fn (MagicGetEvent $e) => $e->setOutput($this->data[$e->name] ?? null));
         $this->onSet('*', fn (MagicSetEvent $e) => $this->data[$e->name] = $e->value);

@@ -19,8 +19,6 @@ use ReflectionClass;
  */
 trait Magic
 {
-    use BootsTraits;
-
     /* @var MagicEventHandlers */
     private array $callers = [];
 
@@ -62,9 +60,11 @@ trait Magic
      * Register handlers for calls to __call with names that match the specified pattern. Patterns
      * are matched using the fnmatch function.
      */
-    public function onCall(string $pattern, Closure ...$handlers): void
+    public function onCall(string $pattern, Closure ...$handlers): static
     {
         $this->callers[$pattern] = [...$this->callers[$pattern] ?? [], ...$handlers];
+
+        return $this;
     }
 
     /**
@@ -84,9 +84,11 @@ trait Magic
      *
      * @param  MagicEventHandler  ...$handlers
      */
-    public function onGet(string $pattern, Closure ...$handlers): void
+    public function onGet(string $pattern, Closure ...$handlers): static
     {
         $this->getters[$pattern] = [...$this->getters[$pattern] ?? [], ...$handlers];
+
+        return $this;
     }
 
     /**
@@ -95,9 +97,11 @@ trait Magic
      *
      * @param  MagicEventHandler  ...$handlers
      */
-    public function onSet(string $pattern, Closure ...$handlers): void
+    public function onSet(string $pattern, Closure ...$handlers): static
     {
         $this->setters[$pattern] = [...$this->setters[$pattern] ?? [], ...$handlers];
+
+        return $this;
     }
 
     public function offsetGet(mixed $offset): mixed

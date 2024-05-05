@@ -54,13 +54,10 @@ composer require spleenboy/php-magic
 
 ## What's in the Box?
 
-This package provides powerful utilities for reusing code and adding functionality to your classes. Under the hood, it takes advantange of [PHP's magic methods](https://www.php.net/manual/en/language.oop5.magic.php) to provide a composable way to add functionality to your classes via custom [attributes](https://www.php.net/manual/en/class.attribute).
+This package provides powerful utilities for reusing code and adding functionality to your classes. The `Magic` in this package takes advantange of [PHP's magic methods](https://www.php.net/manual/en/language.oop5.magic.php) to provide a composable way to add functionality to your classes via [PHP DocBlocks](https://docs.phpdoc.org/) and [custom attributes](https://www.php.net/manual/en/class.attribute).
 
 This package uses magic methods to add members that aren't exclicitly defined in your classes.
 
-### [Properties](docs/properties.md)
+### [Magic Properties](docs/properties.md)
 
 The `Properties` trait adds support in your classes to define magic properties and methods in the docblock for your class. You can further customize these using the `#[MagicProperty]` attribute.
-
-### [Track Changes](docs/track-changes.md)
-Track changes to protected class properties in a class.
