@@ -191,10 +191,11 @@ trait Magic
 
     /**
      * Attempts to use the handlers to process the event. If none of the handlers stop the event or
-     * provide output, the fallback closure is called.
+     * provide output, the fallback closure is called
      *
      * @param  string  $type
      * @param  MagicEventHandlers[]  $handlers
+     * @param  fn (): mixed  $fallback The parent fallback to call if no handlers are found.
      * @return void
      */
     protected static function useMagic(MagicEvent $event, array $handlers, Closure $fallback)
