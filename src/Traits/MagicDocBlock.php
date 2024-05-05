@@ -133,7 +133,6 @@ trait MagicDocBlock
      */
     protected function registerUnboundProperty(PhpDocTagNode $tag, MagicProperty $config)
     {
-        // TODO: Add type coercion
         $name = ltrim($tag->value->propertyName, '$');
         $type = $tag->value->type?->name ?? null;
 
@@ -151,11 +150,11 @@ trait MagicDocBlock
             $this->onSet(
                 $name,
                 function (MagicSetEvent $event) use ($name, $type, $config) {
-                    if ($type) {
+                    $event->value = $this->valueAfterTransforms($event->value, $config->onSet);
+                    if ($type && gettype($event->value) !== $type) {
                         $event->value = $this->coerceType($event->value, $type);
                     }
-                    $value = $this->valueAfterTransforms($event->value, $config->onSet);
-                    $this->unboundProperties[$name] = $value;
+                    $this->unboundProperties[$name] = $event->value;
                 }
             );
         }
