@@ -11,13 +11,20 @@ use Closure;
  */
 class MagicEvent
 {
-    /**
-     * The name of the member being accessed
-     */
-    public string $name = '';
-
     /** Should propagation of this event should stop */
     public bool $stopped = false;
+
+    public int $createdAt;
+
+    /**
+     * Creates a new base magic event
+     *
+     * @param  string  $name The name of the class member being accessed
+     */
+    public function __construct(public string $name)
+    {
+        $this->createdAt = time();
+    }
 
     /**
      * The resulting output of the event

@@ -26,7 +26,14 @@ trait MagicDocBlock
 
     private array $unboundProperties = [];
 
-    public function getRawValue(string $name, ?Closure $default = null)
+    /**
+     * Gets the raw value of a named property, without any transformations applied to it.
+     *
+     * @param  string  $name  The name of the property
+     * @param  Closure|null  $default  A closure that returns the default value if the property is not set
+     * @return mixed The raw value of the property
+     */
+    public function getRawValue(string $name, ?Closure $default = null): mixed
     {
         if (isset($this->unboundProperties[$name])) {
             return $this->unboundProperties[$name];

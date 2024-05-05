@@ -8,5 +8,6 @@ class MagicCallEvent extends MagicEvent
       public string $name,
       public array $arguments,
     ) {
+        parent::__construct($name);
     }
 }

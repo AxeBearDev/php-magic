@@ -212,15 +212,19 @@ trait Magic
             return $fallback();
         }
 
+        $resolve = function ($event) {
+            return $event->getOutput();
+        };
+
         foreach ($handlers as $handler) {
             $handler($event);
 
             if ($event->stopped) {
-                return $event->hasOutput() ? $event->getOutput() : null;
+                return $resolve($event);
             }
         }
 
-        return $event->hasOutput() ? $event->getOutput() : null;
+        return $resolve($event);
     }
 
     /**

@@ -14,5 +14,6 @@ class MagicSetEvent extends MagicEvent
       public string $name,
       public mixed $value,
     ) {
+        parent::__construct($name);
     }
 }

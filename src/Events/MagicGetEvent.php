@@ -7,5 +7,6 @@ class MagicGetEvent extends MagicEvent
     public function __construct(
       public string $name,
     ) {
+        parent::__construct($name);
     }
 }
