@@ -253,3 +253,67 @@ $model = new Model();
 $model->name('ernst');
 echo $model->name(); // ernst
 ```
+
+---
+# Overloaded Methods
+
+PHP doesn't yet offer clean syntax for overloading methods. With the `#[Overloaded]` attribute and the `OverloadedMethods` trait, you can split out the logic for overloaded methods into separate methods that are called based on the type of the arguments passed to the method.
+
+Instead of:
+
+```php
+class Model {
+  public function find(...$args) {
+    if (count($args) === 1 && is_int($args[0])) {
+      return $this->findById($args[0]);
+    }
+    if (count($args) === 1 && is_string($args[0])) {
+      return $this->findBySlug($args[0]);
+    }
+    if (count($args) === 2 && is_string($args[0]) && is_int($args[1])) {
+      return $this->findBySlugAndId($args[0], $args[1]);
+    }
+
+    throw new InvalidArgumentException('Invalid arguments');
+  }
+
+  protected function findById(int $id) {
+    return "id: $id";
+  }
+
+  protected function findBySlug(string $slug) {
+    return "slug: $slug";
+  }
+
+  protected function findBySlugAndId(string $slug, int $id) {
+    return "slug: $slug, id: $id";
+  }
+}
+```
+
+You can do this:
+
+```php
+
+use AxeBear\Magic\Attributes\Overloaded;
+use AxeBear\Magic\Traits\OverloadedMethods;
+
+class Model {
+  use OverloadedMethods;
+
+  #[Overloaded('find')]
+  protected function findById(int $id) {
+    return "id: $id";
+  }
+
+  #[Overloaded('find')]
+  protected function findBySlug(string $slug) {
+    return "slug: $slug";
+  }
+
+  #[Overloaded]('find')
+  protected function findBySlugAndId(string $slug, int $id) {
+    return "slug: $slug, id: $id";
+  }
+}
+```
