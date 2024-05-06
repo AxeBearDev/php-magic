@@ -298,6 +298,9 @@ You can do this:
 use AxeBear\Magic\Attributes\Overloaded;
 use AxeBear\Magic\Traits\OverloadedMethods;
 
+/**
+ * @method string find(...$args)
+ */
 class Model {
   use OverloadedMethods;
 
