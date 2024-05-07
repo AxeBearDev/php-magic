@@ -13,19 +13,20 @@ use ReflectionUnionType;
  */
 trait Reflections
 {
-    protected function methodAllowsArguments(ReflectionMethod $method, array $arguments): bool
+    public function methodAllowsArguments(ReflectionMethod $method, array $arguments): bool
     {
         $params = $method->getParameters();
         $passedCount = count($arguments);
+        $countMatches = $passedCount === count($params);
         $requiredCount = count(array_filter($params, fn ($param) => ! $param->isOptional()));
 
         // If there are more passed arguments than what this method requires, it's not a match.
-        if ($passedCount > $requiredCount && ! $method->isVariadic()) {
+        if (! $countMatches && $passedCount > $requiredCount && ! $method->isVariadic()) {
             return false;
         }
 
         // If there are fewer passed arguments than what this method requires, it's not a match.
-        if ($passedCount < $requiredCount) {
+        if (! $countMatches && $passedCount < $requiredCount) {
             return false;
         }
 
@@ -48,7 +49,7 @@ trait Reflections
     /**
      * Tests whether the provided parameter should allow the provided value.
      */
-    protected function parameterAllowsValue(?ReflectionParameter $param, mixed $value): bool
+    public function parameterAllowsValue(?ReflectionParameter $param, mixed $value): bool
     {
         if (! $param) {
             return false;
@@ -94,13 +95,13 @@ trait Reflections
     /**
      * Tests whether the provided type should allow the provided value.
      */
-    protected function typeAllowsValue(ReflectionNamedType $type, mixed $value): bool
+    public function typeAllowsValue(ReflectionNamedType $type, mixed $value): bool
     {
         $typeName = $type->getName();
         $valueType = get_debug_type($value);
 
         if (is_object($value)) {
-            return $valueType === $typeName || is_subclass_of($value, $typeName);
+            return $valueType === $typeName || is_subclass_of($valueType, $typeName);
         }
 
         if ($typeName === 'mixed') {

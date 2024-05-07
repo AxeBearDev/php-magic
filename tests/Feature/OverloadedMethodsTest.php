@@ -75,7 +75,7 @@ class OverloadedModel
     }
 }
 
-describe('Variadic Functions', function () {
+describe('OverloadedMethods', function () {
     test('find exists', function () {
         $model = new OverloadedModel();
         expect($model->hasMagicCaller('find'))->toBeTrue();
@@ -88,6 +88,13 @@ describe('Variadic Functions', function () {
         expect($result)->toBe($expected);
     });
 
+    test('find by age with default', function () {
+        $model = new OverloadedModel();
+        $defaultValue = new OverloadedModelItem('Default', 0, 0.0);
+        $result = $model->find(1, $defaultValue);
+        expect($result)->toBe($defaultValue);
+    });
+
     test('find by name', function () {
         $model = new OverloadedModel();
         $result = $model->find('Blue');
@@ -95,11 +102,25 @@ describe('Variadic Functions', function () {
         expect($result)->toBe($expected);
     });
 
+    test('find by name with default', function () {
+        $model = new OverloadedModel();
+        $defaultValue = new OverloadedModelItem('Default', 0, 0.0);
+        $result = $model->find('Unknown', $defaultValue);
+        expect($result)->toBe($defaultValue);
+    });
+
     test('find by key', function () {
         $model = new OverloadedModel();
         $result = $model->find('name', 'Blue');
         $expected = $model->findByKey('name', 'Blue');
         expect($result)->toBe($expected);
+    });
+
+    test('find by key with default', function () {
+        $model = new OverloadedModel();
+        $defaultValue = new OverloadedModelItem('Default', 0, 0.0);
+        $result = $model->find('name', 'Unknown', $defaultValue);
+        expect($result)->toBe($defaultValue);
     });
 
     test('error on no matches', function () {

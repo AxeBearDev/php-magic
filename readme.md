@@ -1,11 +1,20 @@
 # PHP Magic
 
-This PHP package provides utilities for adding magic properties and methods to your classes using custom attributes and docblocks.
+This PHP package provides utilities for adding magic properties and methods to your classes using custom attributes and docblocks. Highlights include:
+
+- Automagic properties, created with the `@property` tag.
+- Automagic cached, calculated properties using the `@property-read` tag and a method with the same name.
+- Automagic fluent methods the `@method` tag.
+- Easier overloaded methods. Use `@method` and the `#[Overloaded]` attribute to split out the logic for overloaded methods into separate methods. This package will call the correct method based on the arguments.
+- Transformed properties, on set or get, with the `#[MagicProperty]` attribute.
+- Full access to add more custom handlers using the `Magic` trait.
 
 Check it out. It's magic!
 
 ```php
 use AxeBear\Magic\Traits\MagicDocBlock;
+use AxeBear\Magic\Traits\OverloadedMethods;
+use AxeBear\Magic\Attributes\Overloaded;
 
 /**
  * This example class shows how class comments
@@ -18,9 +27,24 @@ use AxeBear\Magic\Traits\MagicDocBlock;
  * @method self count(int $count)
  * 
  * @property string $repeatedName
+ * 
+ * @method void update(...$args)
  */
 class Model {
   use MagicDocBlock;
+  use OverloadedMethods;
+
+  #[Overloaded('update')]
+  public function updateFromArray(array $data): void {
+    $this->name ??= $data['name'] ?? null;
+    $this->count ??= $data['count'] ?? null;
+  }
+
+  #[Overloaded('update')]
+  public function updateFromValues(string $name, int $count): void {
+    $this->name = $name;
+    $this->count = $count;
+  }
 
   public function repeatedName(string $name, int $count): string {
     return str_repeat($name, $count);
@@ -29,9 +53,11 @@ class Model {
 
 $model = new Model();
 $model->name('Axe Bear')->count(1);
-echo $model->name; // Axe Bear
-echo $model->count; // 1
-echo $model->repeatedName; // Axe Bear
+$model->update(['name' => 'Axe', 'count' => 2]);
+$model->update('Bear', 2);
+echo $model->name; // Bear
+echo $model->count; // 2
+echo $model->repeatedName; // BearBear
 
 ```
 
