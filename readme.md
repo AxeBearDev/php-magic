@@ -5,7 +5,7 @@ This PHP package provides utilities for adding magic properties and methods to y
 - Automagic properties, created with the `@property` tag.
 - Automagic cached, calculated properties using the `@property-read` tag and a method with the same name.
 - Automagic fluent methods the `@method` tag.
-- Easier overloaded methods. Use `@method` and the `#[Overloaded]` attribute to split out the logic for overloaded methods into separate methods. This package will call the correct method based on the arguments.
+- Easier overloaded methods. Use `@method` and the `#[Overloaded]` attribute to split out the logic for overloaded methods into separate functions. This package will call the correct one based on the arguments.
 - Transformed properties, on set or get, with the `#[MagicProperty]` attribute.
 - Full access to add more custom handlers using the `Magic` trait.
 
@@ -72,21 +72,15 @@ composer require spleenboy/php-magic
 - `composer test`: Test with Pest
 - `composer cli`: Open a Pysch shell with the package loaded
 
-## What's in the Box?
-
-This package provides powerful utilities for reusing code and adding functionality to your classes. The `Magic` in this package takes advantange of [PHP's magic methods](https://www.php.net/manual/en/language.oop5.magic.php) to provide a composable way to add functionality to your classes via [PHP DocBlocks](https://docs.phpdoc.org/) and [custom attributes](https://www.php.net/manual/en/class.attribute).
-
-This package uses magic methods to add members that aren't exclicitly defined in your classes.
-
 ---
 
 # Magic
 
-This base trait is a registry for all of the handlers to call when a magic method is needed.
+This base trait is a registry for all of the handlers to call when a magic method is needed. The other traits in this package use this one at their core to provide the magic functionality, but it's also available for you to use directly.
 
 ## Events
 
-When a magic method is called, the `Magic` trait will generate a `MagicEvent` instance and pass it to any registered handles that match the event name. The event name is the name of the class member being called when any of these magic methods are called.
+When a magic method is called, the `Magic` trait will generate a `MagicEvent` instance and pass it to any registered handlers that match the event name (using [fnmatch](https://www.php.net/manual/en/function.fnmatch.php)). 
 
 The base `MagicEvent` instanced includes the following properties:
 
@@ -102,8 +96,8 @@ This class also provides the ability to set an output value that will be returne
 
 ### [__get](https://www.php.net/manual/en/language.oop5.overloading.php#object.get)
 
-Listener: `onGet(string $name, Closure ...$handlers): static`
-Event: `MagicGetEvent`
+- Listener: `onGet(string $name, Closure ...$handlers): static`
+- Event: `MagicGetEvent`
 
 ```php
 public __get(string $name): mixed
@@ -114,8 +108,8 @@ To hook into this event, register one or more handlers using the `$this->onGet($
 
 ### [__set](https://www.php.net/manual/en/language.oop5.overloading.php#object.set)
 
-Listener: `onSet(string $name, Closure ...$handlers): static`
-Event: `MagicSetEvent`
+- Listener: `onSet(string $name, Closure ...$handlers): static`
+- Event: `MagicSetEvent`
 
 ```php
 public __set(string $name, mixed $value): void
@@ -126,8 +120,8 @@ To hook into this event, register one or more handlers using the `$this->onSet($
 
 ### [__call](https://www.php.net/manual/en/language.oop5.overloading.php#object.call)
 
-Listener: `onCall(string $name, Closure ...$handlers): static`
-Event: `MagicCallEvent`
+- Listener: `onCall(string $name, Closure ...$handlers): static`
+- Event: `MagicCallEvent`
 
 ```php
 public __call(string $name, array $arguments): mixed
@@ -138,8 +132,8 @@ To hook into this event, register one or more handlers using the `$this->onCall(
 
 ### [__callStatic](https://www.php.net/manual/en/language.oop5.overloading.php#object.callstatic)
 
-Listener: `onCallStatic(string $name, Closure ...$handlers): void`
-Event: `MagicCallStaticEvent`
+- Listener: `onCallStatic(string $name, Closure ...$handlers): void`
+- Event: `MagicCallStaticEvent`
 
 ```php
 public __callStatic(string $name, array $arguments): mixed
