@@ -2,6 +2,7 @@
   "name": "axebear/php-magic",
   "description": "PHP micro framework for hooking into magic methods with attributes.",
   "type": "library",
+  "license": "MIT",
   "version": "0.1.0",
   "autoload": {
     "psr-4": {
