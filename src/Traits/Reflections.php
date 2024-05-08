@@ -70,16 +70,7 @@ trait Reflections
         }
 
         if ($type instanceof ReflectionIntersectionType) {
-            foreach ($type->getTypes() as $subType) {
-                if ($this->typeAllowsValue($subType, $value)) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        if ($type instanceof ReflectionUnionType) {
+            // Match all or fail
             foreach ($type->getTypes() as $subType) {
                 if (! $this->typeAllowsValue($subType, $value)) {
                     return false;
@@ -87,6 +78,17 @@ trait Reflections
             }
 
             return true;
+        }
+
+        if ($type instanceof ReflectionUnionType) {
+            // Match any or fail
+            foreach ($type->getTypes() as $subType) {
+                if ($this->typeAllowsValue($subType, $value)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         return true;
@@ -100,12 +102,16 @@ trait Reflections
         $typeName = $type->getName();
         $valueType = get_debug_type($value);
 
-        if (is_object($value)) {
-            return $valueType === $typeName || is_subclass_of($valueType, $typeName);
+        if ($typeName === 'iterable') {
+            return is_iterable($value);
         }
 
         if ($typeName === 'mixed') {
             return true;
+        }
+
+        if (interface_exists($typeName) || class_exists($typeName)) {
+            return $value instanceof $typeName;
         }
 
         return $valueType === $typeName;
