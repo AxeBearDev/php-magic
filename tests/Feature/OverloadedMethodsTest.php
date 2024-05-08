@@ -45,7 +45,7 @@ class OverloadedModel
     }
 
     #[Overloaded('find')]
-    public function findByKey(string $key, mixed $value, ?OverloadedModelItem $default = null)
+    public function findByKey(string $key, int|string $value, ?OverloadedModelItem $default = null)
     {
         foreach ($this->items as $item) {
             if ($item->$key === $value) {
