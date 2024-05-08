@@ -1,6 +1,6 @@
 {
   "name": "axebear/php-magic",
-  "description": "PHP micro framework for hooking into magic methods with attributes.",
+  "description": "PHP micro framework for hooking into magic methods using docblocks and attributes.",
   "type": "library",
   "license": "MIT",
   "version": "0.1.0",
