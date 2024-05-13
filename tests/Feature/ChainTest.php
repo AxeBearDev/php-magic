@@ -27,9 +27,9 @@ describe('Chain', function () {
             fn ($x) => $x + 1,
             fn ($x) => throw new Exception('error'),
             fn ($x) => $x - 1,
-        )->onError(fn ($e, $carry, $link) => $carry);
+        )->onError(fn ($e, $carry, $link) => $carry + 2);
         $result = $chain(1);
-        expect($result)->toBe(1);
+        expect($result)->toBe(3);
     });
 
     test('until', function () {

@@ -2,14 +2,15 @@
 
 namespace AxeBear\Magic\Support;
 
-use AxeBear\Magic\Traits\OverloadedMethods;
 use Closure;
 use Throwable;
 
+/**
+ * An invocable that chains a series of callables together,
+ * passing the result of each to the next.
+ */
 class Chain
 {
-    use OverloadedMethods;
-
     protected Closure $until;
 
     protected Closure $then;
@@ -20,11 +21,17 @@ class Chain
 
     protected array $links = [];
 
+    /**
+     * Creates a new chain with the given links.
+     */
     public static function together(callable ...$links): static
     {
         return (new static)->push(...$links);
     }
 
+    /**
+     * Adds new links to the chain
+     */
     public function push(callable ...$links): static
     {
         $this->links = array_merge($this->links, $links);

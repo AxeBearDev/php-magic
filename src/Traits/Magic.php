@@ -213,10 +213,6 @@ trait Magic
             return $fallback();
         }
 
-        $resolve = function ($event) {
-            return $event->getOutput();
-        };
-
         $chain = Chain::together(...$handlers)
           ->carryInput()
           ->until(fn (MagicEvent $event) => $event->stopped)
