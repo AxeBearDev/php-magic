@@ -7,6 +7,7 @@ use AxeBear\Magic\Events\MagicEvent;
 use AxeBear\Magic\Events\MagicGetEvent;
 use AxeBear\Magic\Events\MagicSetEvent;
 use AxeBear\Magic\Exceptions\MagicException;
+use AxeBear\Magic\Support\Chain;
 use Closure;
 use ReflectionClass;
 
@@ -216,15 +217,12 @@ trait Magic
             return $event->getOutput();
         };
 
-        foreach ($handlers as $handler) {
-            $handler($event);
+        $chain = Chain::together(...$handlers)
+          ->carryInput()
+          ->until(fn (MagicEvent $event) => $event->stopped)
+          ->then(fn (MagicEvent $event) => $event->getOutput());
 
-            if ($event->stopped) {
-                return $resolve($event);
-            }
-        }
-
-        return $resolve($event);
+        return $chain($event);
     }
 
     /**
