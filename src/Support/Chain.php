@@ -40,8 +40,8 @@ class Chain
     }
 
     /**
-     * Sets an each handler that carries the input to each link. Useful
-     * for chaining methods that don't return the input.
+     * Ensures that each link returns the input parameter it receives.
+     * Useful for chaining methods that don't return anything.
      */
     public function carryInput(): static
     {
