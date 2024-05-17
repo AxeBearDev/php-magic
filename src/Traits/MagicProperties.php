@@ -15,7 +15,7 @@ use ReflectionMethod;
 use ReflectionParameter;
 use ReflectionProperty;
 
-trait MagicDocBlock
+trait MagicProperties
 {
     use BootsTraits;
     use Magic;
@@ -46,7 +46,7 @@ trait MagicDocBlock
         return $prop ? $prop->getValue($this) : $default();
     }
 
-    protected function bootMagicDocBlock()
+    protected function bootMagicProperties()
     {
         $this->eachMagicProperty(
             MagicProperty::class,

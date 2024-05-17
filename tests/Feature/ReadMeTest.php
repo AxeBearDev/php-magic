@@ -2,7 +2,7 @@
 
 // Test the examples included in the readme file.
 
-use AxeBear\Magic\Traits\MagicDocBlock;
+use AxeBear\Magic\Traits\MagicProperties;
 
 /**
  * This example class shows how class comments
@@ -24,7 +24,7 @@ use AxeBear\Magic\Traits\MagicDocBlock;
  */
 class ReadMeTestModel
 {
-    use MagicDocBlock;
+    use MagicProperties;
 
     protected string $readOnlyValue = 'Hello, World!';
 

@@ -2,6 +2,7 @@
 
 namespace AxeBear\Magic\Support;
 
+use BadMethodCallException;
 use Closure;
 use Throwable;
 
@@ -61,6 +62,10 @@ class Chain
      */
     public function each(Closure $each): static
     {
+        if (isset($this->each)) {
+            throw new BadMethodCallException('Each handler already set');
+        }
+
         $this->each = $each;
 
         return $this;
@@ -73,6 +78,10 @@ class Chain
      */
     public function onError(Closure $handler): static
     {
+        if (isset($this->onError)) {
+            throw new BadMethodCallException('Error handler already set');
+        }
+
         $this->onError = $handler;
 
         return $this;
@@ -85,6 +94,10 @@ class Chain
      */
     public function until(Closure $condition): static
     {
+        if (isset($this->until)) {
+            throw new BadMethodCallException('Until condition already set');
+        }
+
         $this->until = $condition;
 
         return $this;

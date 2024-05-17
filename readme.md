@@ -12,26 +12,26 @@ This PHP package provides utilities for adding magic properties and methods to y
 Check it out. It's magic!
 
 ```php
-use AxeBear\Magic\Traits\MagicDocBlock;
+use AxeBear\Magic\Traits\MagicProperties;
 use AxeBear\Magic\Traits\OverloadedMethods;
 use AxeBear\Magic\Attributes\Overloaded;
 
 /**
  * This example class shows how class comments
  * can be used to define magic properties and methods.
- * 
+ *
  * @property string $name
  * @method self name(string $name)
- * 
+ *
  * @property int $count
  * @method self count(int $count)
- * 
+ *
  * @property string $repeatedName
- * 
+ *
  * @method void update(...$args)
  */
 class Model {
-  use MagicDocBlock;
+  use MagicProperties;
   use OverloadedMethods;
 
   #[Overloaded('update')]
@@ -68,7 +68,7 @@ composer require axebeardev/php-magic
 ```
 
 ## Scripts
-  
+
 - `composer test`: Test with Pest
 - `composer cli`: Open a Pysch shell with the package loaded
 
@@ -80,7 +80,7 @@ This base trait is a registry for all of the handlers to call when a magic metho
 
 ## Events
 
-When a magic method is called, the `Magic` trait will generate a `MagicEvent` instance and pass it to any registered handlers that match the event name (using [fnmatch](https://www.php.net/manual/en/function.fnmatch.php)). 
+When a magic method is called, the `Magic` trait will generate a `MagicEvent` instance and pass it to any registered handlers that match the event name (using [fnmatch](https://www.php.net/manual/en/function.fnmatch.php)).
 
 The base `MagicEvent` instanced includes the following properties:
 
@@ -93,8 +93,7 @@ This class also provides the ability to set an output value that will be returne
 - `hasOutput(): bool` Checks if the event has an output value set. (This is important because `null` is a valid output value.)
 - `getOutput(?Closure $defaultValue = null): mixed` Gets the output value for the event.
 
-
-### [__get](https://www.php.net/manual/en/language.oop5.overloading.php#object.get)
+### [\_\_get](https://www.php.net/manual/en/language.oop5.overloading.php#object.get)
 
 - Listener: `onGet(string $name, Closure ...$handlers): static`
 - Event: `MagicGetEvent`
@@ -105,8 +104,7 @@ public __get(string $name): mixed
 
 To hook into this event, register one or more handlers using the `$this->onGet($pattern, Closure ...$handlers)` method. The closure should expect a `MagicGetEvent` instance as its parameter.
 
-
-### [__set](https://www.php.net/manual/en/language.oop5.overloading.php#object.set)
+### [\_\_set](https://www.php.net/manual/en/language.oop5.overloading.php#object.set)
 
 - Listener: `onSet(string $name, Closure ...$handlers): static`
 - Event: `MagicSetEvent`
@@ -117,8 +115,7 @@ public __set(string $name, mixed $value): void
 
 To hook into this event, register one or more handlers using the `$this->onSet($pattern, Closure ...$handlers)` method. The closure should expect a `MagicSetEvent` instance as its parameter. This event includes an additional `value` property that contains the value being set.
 
-
-### [__call](https://www.php.net/manual/en/language.oop5.overloading.php#object.call)
+### [\_\_call](https://www.php.net/manual/en/language.oop5.overloading.php#object.call)
 
 - Listener: `onCall(string $name, Closure ...$handlers): static`
 - Event: `MagicCallEvent`
@@ -129,8 +126,7 @@ public __call(string $name, array $arguments): mixed
 
 To hook into this event, register one or more handlers using the `$this->onCall($pattern, Closure ...$handlers)` method. The closure should expect a `MagicCallEvent` instance as its parameter. This event includes an additional `arguments` property that contains the arguments being passed to the method.
 
-
-### [__callStatic](https://www.php.net/manual/en/language.oop5.overloading.php#object.callstatic)
+### [\_\_callStatic](https://www.php.net/manual/en/language.oop5.overloading.php#object.callstatic)
 
 - Listener: `onCallStatic(string $name, Closure ...$handlers): void`
 - Event: `MagicCallStaticEvent`
@@ -143,7 +139,7 @@ To hook into this event, register one or more handlers using the `$this->onCallS
 
 ---
 
-# MagicDocBlock
+# MagicProperties
 
 This trait inspects your class documentation for `@property`, `@property-read`, and `@property-write` tags and adds the corresponding magic methods to your class so that those properties work. You can optionally add configuration to any of the properties with the `#[MagicProperty]` attribute.
 
@@ -157,7 +153,7 @@ At its simplest when you include `@property` tags in your class documentation, t
  * @property int $count
  */
 class Model {
-  use MagicDocBlock;
+  use MagicProperties;
 }
 
 $model = new Model();
@@ -179,7 +175,7 @@ You can also define read-only and write-only properties with the `@property-read
  * @property-write string $newName
  */
 class Model {
-  use MagicDocBlock;
+  use MagicProperties;
 
   protected string $defaultName = 'leonora';
 
@@ -204,7 +200,7 @@ If the calculation has any dependencies on other class values, you should add th
  * @property-read string $repeatedName
  */
 class Model {
-  use MagicDocBlock;
+  use MagicProperties;
 
   protected string $name;
 
@@ -233,7 +229,7 @@ Both `onSet` and `onGet` accept an array of callables that will be called in the
  * @property string $message
  */
 class Model {
-  use MagicDocBlock;
+  use MagicProperties;
 
   #[MagicProperty(onSet: ['encode'], onGet: ['decode'])]
   protected string $message;
@@ -266,7 +262,7 @@ If the `@method` tag includes one parameter, the `MapDocBlock` trait will add a 
  * @method self name(string $name)
  */
 class Model {
-  use MagicDocBlock;
+  use MagicProperties;
 }
 
 $model = new Model();
@@ -275,6 +271,7 @@ echo $model->name(); // ernst
 ```
 
 ---
+
 # Overloaded Methods
 
 PHP doesn't yet offer clean syntax for overloading methods. With the `#[Overloaded]` attribute and the `OverloadedMethods` trait, you can split out the logic for overloaded methods into separate methods that are called based on the type of the arguments passed to the method.

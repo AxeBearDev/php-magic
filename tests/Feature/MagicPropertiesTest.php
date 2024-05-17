@@ -2,7 +2,7 @@
 
 use AxeBear\Magic\Attributes\MagicProperty;
 use AxeBear\Magic\Exceptions\MagicException;
-use AxeBear\Magic\Traits\MagicDocBlock;
+use AxeBear\Magic\Traits\MagicProperties;
 
 /**
  * Sample class used for testing the #[MagicProperty] attribute and @property tag.
@@ -37,7 +37,7 @@ use AxeBear\Magic\Traits\MagicDocBlock;
  */
 class Model
 {
-    use MagicDocBlock;
+    use MagicProperties;
 
     protected int $count = 0;
 
@@ -80,7 +80,7 @@ class Model
     }
 }
 
-describe('Properties', function () {
+describe('Magic Properties', function () {
     test('basic getters and setters', function () {
         $model = new Model();
         expect($model->name)->toBe('Axe');
