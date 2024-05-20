@@ -137,32 +137,44 @@ trait MagicProperties
         $type = $tag->value->type?->name ?? null;
 
         if ($config->readable()) {
-            $this->onGet(
-                $name,
-                function (MagicGetEvent $event) use ($name, $config) {
-                    $value = $this->valueAfterTransforms($this->getRawValue($name), $config->onGet);
-                    $event->setOutput($value);
-                }
-            );
+            $this->registerUnboundGetter($name, $config);
         }
 
         if ($config->writable()) {
-            $this->onSet(
-                $name,
-                function (MagicSetEvent $event) use ($name, $type, $config) {
-                    $event->value = $this->valueAfterTransforms($event->value, $config->onSet);
-                    if ($type && gettype($event->value) !== $type) {
-                        $event->value = $this->coerceType($event->value, $type);
-                    }
-                    $this->unboundProperties[$name] = $event->value;
-                }
-            );
+            $this->registerUnboundSetter($name, $config, $type);
         }
+    }
+
+    protected function registerUnboundGetter(string $name, MagicProperty $config)
+    {
+        $this->onGet(
+            $name,
+            function (MagicGetEvent $event) use ($name, $config) {
+                $value = $this->valueAfterTransforms($this->getRawValue($name), $config->onGet);
+                $event->setOutput($value);
+            }
+        );
+    }
+
+    protected function registerUnboundSetter(string $name, MagicProperty $config, ?string $type)
+    {
+        $this->onSet(
+            $name,
+            function (MagicSetEvent $event) use ($name, $type, $config) {
+                $event->value = $this->valueAfterTransforms($event->value, $config->onSet);
+                if ($type && gettype($event->value) !== $type) {
+                    $event->value = $this->coerceType($event->value, $type);
+                }
+                $this->unboundProperties[$name] = $event->value;
+            }
+        );
     }
 
     public function coerceType(mixed $value, string $type): mixed
     {
-        settype($value, $type);
+        if (! settype($value, $type)) {
+            throw new InvalidArgumentException('Could not coerce value to type '.$type);
+        }
 
         return $value;
     }
