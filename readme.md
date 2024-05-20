@@ -78,6 +78,11 @@ composer require axebeardev/php-magic
 
 This base trait is a registry for all of the handlers to call when a magic method is needed. The other traits in this package use this one at their core to provide the magic functionality, but it's also available for you to use directly.
 
+
+**Important Hints**
+
+The [visibility](https://www.php.net/manual/en/language.oop5.visibility.php) of the properties and methods that you want to use with the `Magic` trait is important. The class members being [overloaded](https://www.php.net/manual/en/language.oop5.overloading.php) should be `protected` or `private`. That ensures that the magic methods for those class members are called (rather than being called directly.)
+
 ## Events
 
 When a magic method is called, the `Magic` trait will generate a `MagicEvent` instance and pass it to any registered handlers that match the event name (using [fnmatch](https://www.php.net/manual/en/function.fnmatch.php)).
@@ -145,7 +150,12 @@ This trait inspects your class documentation for `@property`, `@property-read`, 
 
 ## Basic Usage
 
-At its simplest when you include `@property` tags in your class documentation, the `MapDocBlock` trait will add a getter and setter for the property.
+At its simplest when you include `@property` tags in your class documentation, the `MagicProperties` trait will add a getter and setter for the property.
+
+
+If there the class includes a protected or private property of the same name, it will be used as the backing storage for the property. If there is not property with the name, the values will be stored in an `unboundProperties` array defined in the trait.
+
+In either case, you can use the `getRawValue` method to get the raw value of the property, bypassing any transformations that may be applied. (See the section on transforming values for more information.)
 
 ```php
 /**
@@ -163,11 +173,15 @@ echo $model->name; // ernst
 
 $model->count = 5;
 echo $model->count; // 5
+
+// Simple type coercion is applied based on the type hint in the property tag.
+$model->count = '6';
+echo $model->count; // 6 
 ```
 
 ## Read-Only and Write-Only Properties
 
-You can also define read-only and write-only properties with the `@property-read` and `@property-write` tags. These variables will need a backing property in your class since otherwise. Otherwise, a readonly property won't have an initial value, and a write-only property won't have a place to store the value.
+You can also define read-only and write-only properties with the `@property-read` and `@property-write` tags. These can't be unbound. They'll need a backing property in your class. Otherwise a readonly property won't have an initial value, and a write-only property won't have a place to store the value.
 
 ```php
 /**
@@ -189,7 +203,7 @@ $model->newName = 'ernst';
 
 ## Calculated Properties
 
-You can also define calculated properties by adding a `@property-read` tag to your class documentation and defining a method with the same name as the property.
+You can also define calculated properties by adding a `@property-read` tag to your class documentation and defining a protected or private method with the same name as the property.
 
 If the calculation has any dependencies on other class values, you should add those as parameters to the method. Use the same name as the class members. Output of calculated properties are cached, and any parameters included in the method signature will be used to calculate the cache.
 
