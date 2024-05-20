@@ -3,7 +3,7 @@
   "description": "PHP micro framework for hooking into magic methods using docblocks and attributes.",
   "type": "library",
   "license": "MIT",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "autoload": {
     "psr-4": {
       "AxeBear\\Magic\\": "src/"
