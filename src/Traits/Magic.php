@@ -20,6 +20,8 @@ use ReflectionClass;
  */
 trait Magic
 {
+    use BootsTraits;
+
     /* @var MagicEventHandlers */
     private array $callers = [];
 

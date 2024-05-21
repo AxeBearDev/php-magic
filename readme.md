@@ -81,7 +81,7 @@ This base trait is a registry for all of the handlers to call when a magic metho
 
 **Important Hints**
 
-The [visibility](https://www.php.net/manual/en/language.oop5.visibility.php) of the properties and methods that you want to use with the `Magic` trait is important. The class members being [overloaded](https://www.php.net/manual/en/language.oop5.overloading.php) should be `protected` or `private`. That ensures that the magic methods for those class members are called (rather than being called directly.)
+The [visibility](https://www.php.net/manual/en/language.oop5.visibility.php) of the properties and methods that you use with the `Magic` trait is important. The class members being [overloaded](https://www.php.net/manual/en/language.oop5.overloading.php) should be inaccessible, either `protected` or `private`, so that the magic methods can be called.
 
 ## Events
 

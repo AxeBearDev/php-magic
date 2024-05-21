@@ -13,7 +13,6 @@ use ReflectionMethod;
  */
 trait OverloadedMethods
 {
-    use BootsTraits;
     use Magic;
     use Reflections;
 

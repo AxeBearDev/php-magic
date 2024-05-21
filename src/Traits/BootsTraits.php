@@ -5,40 +5,66 @@ namespace AxeBear\Magic\Traits;
 use ReflectionClass;
 
 /**
- * Calls a "bootClassName" method on each trait used by the class.
+ * Calls a "boot{ClassName}" method on each trait used by the class.
+ * Also allows for booting traits statically by calling the "bootStatic{ClassName}"
+ * method. Internally tracks which traits have been booted to prevent duplicate calls.
  */
 trait BootsTraits
 {
+    protected bool $bootedInstanceTraits = false;
+
+    protected static bool $bootedStaticTraits = false;
+
     public function __construct(...$args)
     {
         if (get_parent_class($this)) {
             parent::__construct(...$args);
         }
 
-        $this->bootTraits();
-        $this->traitsBooted();
+        $this->bootInstanceTraits();
     }
 
     /**
-     * Provides a hook for initializing the class after the constructor has run.
+     * Boots any traits that include a boot{ClassName} method.
      */
-    protected function traitsBooted(): void
+    protected function bootInstanceTraits(): void
     {
-        // noop
+        if ($this->bootedInstanceTraits) {
+            return;
+        }
+        static::bootTraits('boot', $this);
+        $this->bootedInstanceTraits = true;
     }
 
     /**
-     * Boots any traits that include a bootClassName method.
+     * Boots any traits that include a static bootStatic{ClassName} method
      */
-    protected function bootTraits(): void
+    protected static function bootStaticTraits(): void
     {
-        $traits = $this->traits();
+        if (static::$bootedStaticTraits) {
+            return;
+        }
+        static::bootTraits('boot', null);
+        static::$bootedStaticTraits = true;
+    }
+
+    private static function bootTraits(string $prefix, ?object $context): void
+    {
+        $traits = static::traits();
+
         foreach ($traits as $trait) {
             $reflection = new ReflectionClass($trait);
             $shortName = $reflection->getShortName();
-            $booter = 'boot'.$shortName;
-            if ($reflection->hasMethod($booter)) {
-                $this->$booter();
+            $booter = $prefix.$shortName;
+
+            if (! $reflection->hasMethod($booter)) {
+                continue;
+            }
+
+            if ($context) {
+                $context->{$booter}();
+            } else {
+                $trait::{$booter}();
             }
         }
     }
@@ -46,7 +72,7 @@ trait BootsTraits
     /**
      * Gets a list of traits used by the class or its parents.
      */
-    public function traits(): array
+    public static function traits(): array
     {
         $class = static::class;
         $traits = [];

@@ -17,7 +17,6 @@ use ReflectionProperty;
 
 trait MagicProperties
 {
-    use BootsTraits;
     use Magic;
     use MakesClosures;
     use ParsesDocs;
@@ -25,6 +24,21 @@ trait MagicProperties
     private array $propertyCache = [];
 
     private array $unboundProperties = [];
+
+    protected function bootMagicProperties()
+    {
+        $this->eachMagicProperty(
+            MagicProperty::class,
+            fn ($property, $config) => $this->registerMagicProperty($property, $config)
+        );
+
+        $this->eachMagicMethod(
+            MagicProperty::class,
+            fn ($method, $config) => $this->registerMagicMethod($method, $config)
+        );
+
+        $this->registerClassProperties();
+    }
 
     /**
      * Gets the raw value of a named property, without any transformations applied to it.
@@ -44,21 +58,6 @@ trait MagicProperties
         $prop = $reflection->hasProperty($name) ? $reflection->getProperty($name) : null;
 
         return $prop ? $prop->getValue($this) : $default();
-    }
-
-    protected function bootMagicProperties()
-    {
-        $this->eachMagicProperty(
-            MagicProperty::class,
-            fn ($property, $config) => $this->registerMagicProperty($property, $config)
-        );
-
-        $this->eachMagicMethod(
-            MagicProperty::class,
-            fn ($method, $config) => $this->registerMagicMethod($method, $config)
-        );
-
-        $this->registerClassProperties();
     }
 
     protected function registerMagicMethod(ReflectionMethod $method, MagicProperty $config)

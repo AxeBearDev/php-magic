@@ -24,7 +24,7 @@ class OverloadedModel
 
     public function __construct()
     {
-        $this->bootTraits();
+        $this->bootInstanceTraits();
         $this->items = [
             new OverloadedModelItem('Blue', 25, 1.2),
             new OverloadedModelItem('Red', 30, 1.5),
