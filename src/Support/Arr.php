@@ -50,7 +50,7 @@ class Arr
     {
         return function ($array) use ($test) {
             $found = [];
-            $test ??= fn ($value) => (bool) $value;
+            $test ??= fn ($value, $key) => (bool) $value;
 
             foreach ($array as $key => $value) {
                 if ($test($value, $key)) {

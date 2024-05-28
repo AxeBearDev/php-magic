@@ -8,6 +8,7 @@ use AxeBear\Magic\Events\MagicGetEvent;
 use AxeBear\Magic\Events\MagicSetEvent;
 use AxeBear\Magic\Exceptions\MagicException;
 use AxeBear\Magic\Support\Chain;
+use AxeBear\Magic\Support\EventRegistry;
 use Closure;
 use ReflectionClass;
 
@@ -22,70 +23,37 @@ trait Magic
 {
     use BootsTraits;
 
-    /* @var MagicEventHandlers */
-    private array $callers = [];
+    public readonly EventRegistry $beforeGet;
 
-    /* @var MagicEventHandlers */
-    private array $getters = [];
+    public readonly EventRegistry $onGet;
 
-    /* @var MagicEventHandlers */
-    private array $setters = [];
+    public readonly EventRegistry $afterGet;
 
-    public function hasAnyMagic(string $name): bool
+    public readonly EventRegistry $beforeSet;
+
+    public readonly EventRegistry $onSet;
+
+    public readonly EventRegistry $afterSet;
+
+    public readonly EventRegistry $beforeCall;
+
+    public readonly EventRegistry $onCall;
+
+    public readonly EventRegistry $afterCall;
+
+    protected function initMagic(): void
     {
-        return $this->hasMagicGetter($name) || $this->hasMagicSetter($name) || $this->hasMagicCaller($name);
-    }
+        $this->beforeGet = new EventRegistry();
+        $this->onGet = new EventRegistry();
+        $this->afterGet = new EventRegistry();
 
-    public function hasMagicGetter(string $name): bool
-    {
-        return isset($this->getters[$name]);
-    }
+        $this->beforeSet = new EventRegistry();
+        $this->onSet = new EventRegistry();
+        $this->afterSet = new EventRegistry();
 
-    public function hasMagicSetter(string $name): bool
-    {
-        return isset($this->setters[$name]);
-    }
-
-    public function hasMagicCaller(string $name): bool
-    {
-        return isset($this->callers[$name]);
-    }
-
-    /**
-     * Register handlers for calls to __call with names that match the specified pattern. Patterns
-     * are matched using the fnmatch function.
-     */
-    public function onCall(string $pattern, Closure ...$handlers): static
-    {
-        $this->callers[$pattern] = [...$this->callers[$pattern] ?? [], ...$handlers];
-
-        return $this;
-    }
-
-    /**
-     * Register handlers for calls to __get with names that match the specified pattern. Patterns
-     * are matched using the fnmatch function.
-     *
-     * @param  MagicEventHandler  ...$handlers
-     */
-    public function onGet(string $pattern, Closure ...$handlers): static
-    {
-        $this->getters[$pattern] = [...$this->getters[$pattern] ?? [], ...$handlers];
-
-        return $this;
-    }
-
-    /**
-     * Register handlers for calls to __set with names that match the specified pattern. Patterns
-     * are matched using the fnmatch function.
-     *
-     * @param  MagicEventHandler  ...$handlers
-     */
-    public function onSet(string $pattern, Closure ...$handlers): static
-    {
-        $this->setters[$pattern] = [...$this->setters[$pattern] ?? [], ...$handlers];
-
-        return $this;
+        $this->beforeCall = new EventRegistry();
+        $this->onCall = new EventRegistry();
+        $this->afterCall = new EventRegistry();
     }
 
     public function offsetGet(mixed $offset): mixed
@@ -111,88 +79,106 @@ trait Magic
     public function __call(string $name, array $arguments)
     {
         $event = new MagicCallEvent($name, $arguments);
-        $callers = $this->findMagicHandlers($name, $this->callers);
         $fallback = fn () => parent::__call($name, $arguments);
 
-        return $this->useMagic($event, $callers, $fallback);
+        return $this->useMagic(
+            $event, [
+                $this->beforeCall,
+                $this->onCall,
+                $this->afterCall,
+            ],
+            $fallback
+        );
     }
 
     public function __get(string $name)
     {
         $event = new MagicGetEvent($name);
-        $getters = $this->findMagicHandlers($name, $this->getters);
         $fallback = fn () => parent::__get($name);
 
-        return $this->useMagic($event, $getters, $fallback);
+        return $this->useMagic(
+            $event, [
+                $this->beforeGet,
+                $this->onGet,
+                $this->afterGet,
+            ],
+            $fallback
+        );
     }
 
     public function __set(string $name, mixed $value)
     {
         $event = new MagicSetEvent($name, $value);
-        $setters = $this->findMagicHandlers($name, $this->setters);
         $fallback = fn () => parent::__set($name, $value);
 
-        return $this->useMagic($event, $setters, $fallback);
+        return $this->useMagic(
+            $event, [
+                $this->beforeSet,
+                $this->onSet,
+                $this->afterSet,
+            ],
+            $fallback
+        );
     }
 
     public function __isset(string $name): bool
     {
-        return isset($this->getters[$name]) || (class_parents($this) && parent::__isset($name));
+        return $this->onGet->has($name) || (class_parents($this) && parent::__isset($name));
     }
 
     public function __unset(string $name): void
     {
-        if (isset($this->setters[$name])) {
-            unset($this->setters[$name]);
+        if ($this->onSet->handles($name)) {
+            $this->onSet->unset($name);
         } elseif (class_parents($this)) {
             parent::__unset($name);
         }
     }
 
     /**
-     * Collects the handlers for a magic event based on the name of the member called.
-     *
-     * @param  MagicEventHandlers  $handlers
-     * @return MagicEventHandler[]
-     */
-    protected function findMagicHandlers(string $search, array $groups): array
-    {
-        $found = [];
-
-        foreach ($groups as $pattern => $handlers) {
-            if (fnmatch($pattern, $search)) {
-                $found = [...$found, ...$handlers];
-            }
-        }
-
-        return $found;
-    }
-
-    /**
      * Attempts to use the handlers to process the event. If none of the handlers stop the event or
      * provide output, the fallback closure is called
      *
-     * @param  string  $type
-     * @param  MagicEventHandlers[]  $handlers
+     * @param  EventRegistry  $before The registry of before handlers.
+     * @param  EventRegistry  $on The registry of on handlers.
+     * @param  EventRegistry  $after The registry of after handlers.
      * @param  fn (): mixed  $fallback The parent fallback to call if no handlers are found.
      * @return void
      */
-    protected function useMagic(MagicEvent $event, array $handlers, Closure $fallback)
+    protected function useMagic(
+      MagicEvent $event,
+      EventRegistry $before,
+      EventRegistry $on,
+      EventRegistry $after,
+      Closure $fallback)
     {
         $fallback = (bool) class_parents($this::class)
           ? $fallback
           : fn () => throw new MagicException('No handlers found for '.$event->name);
 
-        if (! $handlers) {
-            return $fallback();
-        }
+        $befores = $before->find($event->name);
+        $ons = $on->find($event->name);
+        $afters = $after->find($event->name);
 
-        $chain = Chain::together(...$handlers)
+        $handleBefore = Chain::together(...$befores)
           ->carryInput()
           ->until(fn (MagicEvent $event) => $event->stopped)
           ->then(fn (MagicEvent $event) => $event->getOutput());
 
-        return $chain($event);
+        $handleOn = Chain::together(...$ons)
+          ->carryInput()
+          ->until(fn (MagicEvent $event) => $event->stopped)
+          ->then(fn (MagicEvent $event) => $event->getOutput());
+
+        $handleAfter = Chain::together(...$afters)
+          ->carryInput()
+          ->until(fn (MagicEvent $event) => $event->stopped);
+
+        $preparedEvent = $handleBefore($event);
+        $result = $handleOn($preparedEvent);
+        $handleAfter($result);
+
+        return $result->getOutput();
     }
 
     /**
