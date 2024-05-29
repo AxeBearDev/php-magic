@@ -2,7 +2,7 @@
 
 use AxeBear\Magic\Attributes\MagicProperty;
 use AxeBear\Magic\Traits\MagicProperties;
-use AxeBear\Magic\Traits\TracksChanges;
+use AxeBear\Magic\Traits\TrackChanges;
 
 /**
  * @property string $name
@@ -11,7 +11,7 @@ use AxeBear\Magic\Traits\TracksChanges;
  */
 class TrackChangesTestModel
 {
-    use MagicProperties, TracksChanges;
+    use MagicProperties, TrackChanges;
 
     #[MagicProperty(onSet: ['strtoupper'])]
     protected string $upperCaseName;

@@ -7,7 +7,7 @@ use AxeBear\Magic\Events\MagicSetEvent;
 use AxeBear\Magic\Support\Arr;
 use DivisionByZeroError;
 
-trait TracksChanges
+trait TrackChanges
 {
     use Boots, Magic;
 
