@@ -119,6 +119,7 @@ trait MagicProperties
                             $config->onSet
                         );
                         $property->setValue($this, $value);
+                        $event->setOutput($value);
                     }
                 );
             }
@@ -160,11 +161,12 @@ trait MagicProperties
         $this->onMagicSet(
             $name,
             function (MagicSetEvent $event) use ($name, $type, $config) {
-                $event->value = $this->valueAfterTransforms($event->value, $config->onSet);
-                if ($type && gettype($event->value) !== $type) {
-                    $event->value = $this->coerceType($event->value, $type);
+                $newValue = $this->valueAfterTransforms($event->value, $config->onSet);
+                if ($type && gettype($newValue) !== $type) {
+                    $newValue = $this->coerceType($newValue, $type);
                 }
-                $this->unboundProperties[$name] = $event->value;
+                $this->unboundProperties[$name] = $newValue;
+                $event->setOutput($newValue);
             }
         );
     }
