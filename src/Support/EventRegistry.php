@@ -8,7 +8,10 @@ class EventRegistry
 {
     protected array $handlers = [];
 
-    protected array $afters = [];
+    public function __invoke(string $pattern, Closure ...$handlers): static
+    {
+        return $this->on($pattern, ...$handlers);
+    }
 
     public function on(string $pattern, Closure ...$handlers): static
     {
@@ -51,17 +54,14 @@ class EventRegistry
      */
     public function find(string $event): array
     {
-        $finder = Chain::together(
-            Arr::where(fn ($handlers, $pattern) => fnmatch($pattern, $event)),
-            Arr::flatten(),
-            Arr::values()
-        );
+        $found = [];
 
-        return $finder($this->handlers);
-    }
+        foreach ($this->handlers as $pattern => $handlers) {
+            if (fnmatch($pattern, $event)) {
+                $found = [...$found, ...$handlers];
+            }
+        }
 
-    public function __invoke(string $pattern, Closure ...$handlers): static
-    {
-        return $this->on($pattern, ...$handlers);
+        return $found;
     }
 }
