@@ -2,6 +2,7 @@
 
 namespace AxeBear\Magic\Traits;
 
+use AxeBear\Magic\Attributes\Booter;
 use AxeBear\Magic\Attributes\Overloaded;
 use AxeBear\Magic\Events\MagicCallEvent;
 use AxeBear\Magic\Exceptions\MagicException;
@@ -13,10 +14,10 @@ use ReflectionMethod;
  */
 trait OverloadedMethods
 {
-    use Magic;
-    use Reflections;
+    use Boots, Magic, Reflections;
 
-    public function bootOverloadedMethods()
+    #[Booter]
+    protected function bootOverloadedMethods()
     {
         $overloads = $this->getOverloadedMethodsByName();
         foreach ($overloads as $name => $methods) {
@@ -26,7 +27,7 @@ trait OverloadedMethods
 
     protected function registerOverloads(string $name, array $methods)
     {
-        $this->onCall($name, function (MagicCallEvent $event) use ($methods) {
+        $this->onMagicCall($name, function (MagicCallEvent $event) use ($methods) {
             $overload = $this->findOverloadedMethod($event, $methods);
             $event->setOutput($overload->invokeArgs($this, $event->arguments));
         });
@@ -60,7 +61,7 @@ trait OverloadedMethods
 
     protected function getOverloadedMethodsByName()
     {
-        $overloads = $this->getMagicMethods(Overloaded::class);
+        $overloads = $this->getMethodsWithAttribute(Overloaded::class);
         $grouped = [];
         foreach ($overloads as [$method, $attributes]) {
             if (count($attributes) !== 1) {

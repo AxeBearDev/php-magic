@@ -24,7 +24,7 @@ class OverloadedModel
 
     public function __construct()
     {
-        $this->bootInstanceTraits();
+        $this->bootAll();
         $this->items = [
             new OverloadedModelItem('Blue', 25, 1.2),
             new OverloadedModelItem('Red', 30, 1.5),
@@ -78,7 +78,7 @@ class OverloadedModel
 describe('OverloadedMethods', function () {
     test('find exists', function () {
         $model = new OverloadedModel();
-        expect($model->hasMagicCaller('find'))->toBeTrue();
+        expect($model->onMagicCall->handles('find'))->toBeTrue();
     });
 
     test('find by age', function () {
