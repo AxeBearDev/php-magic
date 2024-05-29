@@ -2,6 +2,7 @@
 
 namespace AxeBear\Magic\Traits;
 
+use ReflectionClass;
 use ReflectionIntersectionType;
 use ReflectionMethod;
 use ReflectionNamedType;
@@ -115,5 +116,70 @@ trait Reflections
         }
 
         return $valueType === $typeName;
+    }
+
+    /**
+     * Gets the methods that have the specified attribute
+     *
+     * @return array<array{0: \ReflectionMethod, 1: array<\ReflectionAttribute>}>
+     */
+    public function getMethodsWithAttribute(string $attributeName): array
+    {
+        $reflection = new ReflectionClass($this);
+
+        return $this->collectAttributes($attributeName, $reflection->getMethods());
+    }
+
+    /**
+     * Gets the properties that have the specified attribute
+     *
+     * @return array<array{0: \ReflectionProperty, 1: array<\ReflectionAttribute>}>
+     */
+    public function getPropertiesWithAttribute(string $attributeName): array
+    {
+        $reflection = new ReflectionClass($this);
+
+        return $this->collectAttributes($attributeName, $reflection->getProperties());
+    }
+
+    /**
+     * Collects the attributes of the specified name from the provided items.
+     *
+     * @param  array<T>  $items
+     * @return array<array{0: T, 1: array<\ReflectionAttribute>}>
+     */
+    protected function collectAttributes(string $attributeName, array $items): array
+    {
+        $collected = [];
+
+        foreach ($items as $item) {
+            $attributes = $item->getAttributes($attributeName);
+            if ($attributes) {
+                $collected[] = [$item, $attributes];
+            }
+        }
+
+        return $collected;
+    }
+
+    protected function isInvokableProperty(string $name): bool
+    {
+        $reflection = new ReflectionClass($this);
+
+        if (! $reflection->hasProperty($name)) {
+            return false;
+        }
+
+        $property = $reflection->getProperty($name);
+
+        if (! $property->isPublic()) {
+            return false;
+        }
+
+        if ($property->isInitialized($this)) {
+            return is_callable($property->getValue($this));
+        }
+
+        return false;
     }
 }

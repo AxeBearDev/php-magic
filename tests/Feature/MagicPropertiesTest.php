@@ -37,7 +37,7 @@ use AxeBear\Magic\Traits\MagicProperties;
  * @method self unboundString(string $value)
  * @method string unboundString()
  */
-class Model
+class MagicPropertiesTestModel
 {
     use MagicProperties;
 
@@ -85,7 +85,7 @@ class Model
 
 describe('DocBlock settings', function () {
     test('basic getters and setters', function () {
-        $model = new Model();
+        $model = new MagicPropertiesTestModel();
         expect($model->name)->toBe('Axe');
         expect($model->leaving)->toBe(false);
 
@@ -97,7 +97,7 @@ describe('DocBlock settings', function () {
     });
 
     test('calculated methods', function () {
-        $model = new Model();
+        $model = new MagicPropertiesTestModel();
 
         $model->leaving = true;
         expect($model->message)->toBe('Goodbye, World!');
@@ -113,7 +113,7 @@ describe('DocBlock settings', function () {
 
 describe('MagicProperty Attribute', function () {
     test('access', function () {
-        $model = new Model();
+        $model = new MagicPropertiesTestModel();
 
         $this->expectException(MagicException::class);
         $model->farewell;
@@ -129,20 +129,20 @@ describe('MagicProperty Attribute', function () {
     });
 
     test('onGet', function () {
-        $model = new Model();
+        $model = new MagicPropertiesTestModel();
         $model->slug = 'oozy the doozy';
         expect($model->slug)->toBe('OOZY THE DOOZY');
         expect($model->getRawValue('slug'))->toBe('oozy the doozy');
     });
 
     test('onSet', function () {
-        $model = new Model();
+        $model = new MagicPropertiesTestModel();
         $model->title = 'axebear';
         expect($model->title)->toBe('AXEBEAR');
     });
 
     test('onGet and onSet', function () {
-        $model = new Model();
+        $model = new MagicPropertiesTestModel();
         $model->subtitle = ['key' => 'value'];
         expect($model->subtitle)->toBeInstanceOf(stdClass::class);
         expect($model->subtitle->key)->toBe('value');
@@ -151,7 +151,7 @@ describe('MagicProperty Attribute', function () {
     });
 
     test('uncached properties', function () {
-        $model = new Model();
+        $model = new MagicPropertiesTestModel();
         $model->name = 'Axe';
         expect($model->uncachedName)->toBe('Axe');
         $model->name = 'Bear';
@@ -159,7 +159,7 @@ describe('MagicProperty Attribute', function () {
     });
 
     test('aliases', function () {
-        $model = new Model();
+        $model = new MagicPropertiesTestModel();
         expect($model->greeting)->toBe($model->hello);
         expect($model->greeting)->toBe($model->howdy);
     });
@@ -167,7 +167,7 @@ describe('MagicProperty Attribute', function () {
 
 describe('Unbound Properties', function () {
     test('get, set and getRawValue', function () {
-        $model = new Model();
+        $model = new MagicPropertiesTestModel();
         expect($model->unboundNumber)->toBeNull();
         $model->unboundNumber = '1';
         expect($model->unboundNumber)->toBe(1);
@@ -175,7 +175,7 @@ describe('Unbound Properties', function () {
     });
 
     test('type conversion', function () {
-        $model = new Model();
+        $model = new MagicPropertiesTestModel();
 
         $model->unboundNumber = '1';
         expect($model->unboundNumber)->toBe(1);
@@ -204,13 +204,13 @@ describe('Unbound Properties', function () {
 
 describe('Fluent Methods', function () {
     test('getters', function () {
-        $model = new Model();
+        $model = new MagicPropertiesTestModel();
         expect($model->count())->toBe(0);
         expect($model->name())->toBe('Axe');
     });
 
     test('setters', function () {
-        $model = new Model();
+        $model = new MagicPropertiesTestModel();
         $model->count(1);
         $model->title('AxeBear');
 
@@ -219,14 +219,14 @@ describe('Fluent Methods', function () {
     });
 
     test('return self', function () {
-        $model = new Model();
+        $model = new MagicPropertiesTestModel();
         expect($model->unboundString())->toBeNull();
-        expect($model->unboundString('AxeBear'))->toBeInstanceOf(Model::class);
+        expect($model->unboundString('AxeBear'))->toBeInstanceOf(MagicPropertiesTestModel::class);
         expect($model->unboundString())->toBe('AxeBear');
     });
 
     test('invalid argument lengths', function () {
-        $model = new Model();
+        $model = new MagicPropertiesTestModel();
 
         $this->expectException(InvalidArgumentException::class);
         $model->name(1);

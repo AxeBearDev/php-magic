@@ -2,6 +2,7 @@
 
 namespace AxeBear\Magic\Traits;
 
+use AxeBear\Magic\Attributes\Booter;
 use AxeBear\Magic\Attributes\MagicProperty;
 use AxeBear\Magic\Events\MagicCallEvent;
 use AxeBear\Magic\Events\MagicGetEvent;
@@ -17,14 +18,13 @@ use ReflectionProperty;
 
 trait MagicProperties
 {
-    use Magic;
-    use MakesClosures;
-    use ParsesDocs;
+    use Boots, Magic, MakesClosures, ParsesDocs;
 
     private array $propertyCache = [];
 
     private array $unboundProperties = [];
 
+    #[Booter]
     protected function bootMagicProperties()
     {
         $this->eachMagicProperty(
@@ -84,7 +84,7 @@ trait MagicProperties
         };
 
         foreach ($aliases as $alias) {
-            $this->onGet($alias, $onGet);
+            $this->onMagicGet($alias, $onGet);
         }
     }
 
@@ -98,7 +98,7 @@ trait MagicProperties
 
         foreach ($aliases as $alias) {
             if ($config->readable()) {
-                $this->onGet(
+                $this->onMagicGet(
                     $alias,
                     function (MagicGetEvent $event) use ($property, $config) {
                         $value = $this->valueAfterTransforms(
@@ -111,7 +111,7 @@ trait MagicProperties
             }
 
             if ($config->writable()) {
-                $this->onSet(
+                $this->onMagicSet(
                     $alias,
                     function (MagicSetEvent $event) use ($property, $config) {
                         $value = $this->valueAfterTransforms(
@@ -146,7 +146,7 @@ trait MagicProperties
 
     protected function registerUnboundGetter(string $name, MagicProperty $config)
     {
-        $this->onGet(
+        $this->onMagicGet(
             $name,
             function (MagicGetEvent $event) use ($name, $config) {
                 $value = $this->valueAfterTransforms($this->getRawValue($name), $config->onGet);
@@ -157,7 +157,7 @@ trait MagicProperties
 
     protected function registerUnboundSetter(string $name, MagicProperty $config, ?string $type)
     {
-        $this->onSet(
+        $this->onMagicSet(
             $name,
             function (MagicSetEvent $event) use ($name, $type, $config) {
                 $event->value = $this->valueAfterTransforms($event->value, $config->onSet);
@@ -212,7 +212,7 @@ trait MagicProperties
         foreach ($tags as $tag) {
             $name = ltrim($tag->value->propertyName, '$');
 
-            if ($this->hasAnyMagic($name)) {
+            if ($this->onMagicCall->has($name) || $this->onMagicGet->has($name) || $this->onMagicSet->has($name)) {
                 // Already registered. Yay!
                 continue;
             }
@@ -256,7 +256,7 @@ trait MagicProperties
         }
 
         foreach ($groups as $name => $methods) {
-            $this->onCall(
+            $this->onMagicCall(
                 $name,
                 function (MagicCallEvent $event) use ($methods) {
                     $isSetting = count($event->arguments) === 1;
@@ -297,11 +297,11 @@ trait MagicProperties
     {
         $name = $param->getName();
 
-        if (method_exists($this, $name) || $this->hasMagicCaller($name)) {
+        if (method_exists($this, $name) || $this->onMagicCall->handles($name)) {
             return $this->{$name}();
         }
 
-        if (property_exists($this, $name) || $this->hasMagicGetter($name)) {
+        if (property_exists($this, $name) || $this->onMagicGet->handles($name)) {
             return $this->{$name};
         }
 

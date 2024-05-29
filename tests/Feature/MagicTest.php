@@ -14,9 +14,10 @@ class MagicTestModel implements ArrayAccess
 
     public function __construct()
     {
-        $this->onGet('*', fn (MagicGetEvent $e) => $e->setOutput($this->data[$e->name] ?? null));
-        $this->onSet('*', fn (MagicSetEvent $e) => $this->data[$e->name] = $e->value);
-        $this->afterSet('*', fn (MagicSetEvent $e) => $this->history[] = $e);
+        $this->bootAll();
+        $this->onMagicGet('*', fn (MagicGetEvent $e) => $e->setOutput($this->data[$e->name] ?? null));
+        $this->onMagicSet('*', fn (MagicSetEvent $e) => $this->data[$e->name] = $e->value);
+        $this->afterMagicSet('*', fn (MagicSetEvent $e) => $this->history[] = $e);
     }
 
     public function getHistory(): array

@@ -2,6 +2,7 @@
 
 namespace AxeBear\Magic\Traits;
 
+use AxeBear\Magic\Attributes\Booter;
 use AxeBear\Magic\Events\MagicCallEvent;
 use AxeBear\Magic\Events\MagicEvent;
 use AxeBear\Magic\Events\MagicGetEvent;
@@ -10,7 +11,6 @@ use AxeBear\Magic\Exceptions\MagicException;
 use AxeBear\Magic\Support\Chain;
 use AxeBear\Magic\Support\EventRegistry;
 use Closure;
-use ReflectionClass;
 
 /**
  * Allows merging of many magic method overrides.
@@ -21,39 +21,41 @@ use ReflectionClass;
  */
 trait Magic
 {
-    use BootsTraits;
+    use Boots, Reflections;
 
-    public readonly EventRegistry $beforeGet;
+    public readonly EventRegistry $beforeMagicGet;
 
-    public readonly EventRegistry $onGet;
+    public readonly EventRegistry $onMagicGet;
 
-    public readonly EventRegistry $afterGet;
+    public readonly EventRegistry $afterMagicGet;
 
-    public readonly EventRegistry $beforeSet;
+    public readonly EventRegistry $beforeMagicSet;
 
-    public readonly EventRegistry $onSet;
+    public readonly EventRegistry $onMagicSet;
 
-    public readonly EventRegistry $afterSet;
+    public readonly EventRegistry $afterMagicSet;
 
-    public readonly EventRegistry $beforeCall;
+    public readonly EventRegistry $beforeMagicCall;
 
-    public readonly EventRegistry $onCall;
+    public readonly EventRegistry $onMagicCall;
 
-    public readonly EventRegistry $afterCall;
+    public readonly EventRegistry $afterMagicCall;
 
-    protected function initMagic(): void
+    // All other traits in this domain rely on this booter to be called first
+    #[Booter(PHP_INT_MAX)]
+    protected function bootMagic(): void
     {
-        $this->beforeGet = new EventRegistry();
-        $this->onGet = new EventRegistry();
-        $this->afterGet = new EventRegistry();
+        $this->beforeMagicGet = new EventRegistry();
+        $this->onMagicGet = new EventRegistry();
+        $this->afterMagicGet = new EventRegistry();
 
-        $this->beforeSet = new EventRegistry();
-        $this->onSet = new EventRegistry();
-        $this->afterSet = new EventRegistry();
+        $this->beforeMagicSet = new EventRegistry();
+        $this->onMagicSet = new EventRegistry();
+        $this->afterMagicSet = new EventRegistry();
 
-        $this->beforeCall = new EventRegistry();
-        $this->onCall = new EventRegistry();
-        $this->afterCall = new EventRegistry();
+        $this->beforeMagicCall = new EventRegistry();
+        $this->onMagicCall = new EventRegistry();
+        $this->afterMagicCall = new EventRegistry();
     }
 
     public function offsetGet(mixed $offset): mixed
@@ -78,58 +80,53 @@ trait Magic
 
     public function __call(string $name, array $arguments)
     {
+        if ($this->isInvokableProperty($name)) {
+            return ($this->$name)(...$arguments);
+        }
+
         $event = new MagicCallEvent($name, $arguments);
-        $fallback = fn () => parent::__call($name, $arguments);
 
         return $this->useMagic(
-            $event, [
-                $this->beforeCall,
-                $this->onCall,
-                $this->afterCall,
-            ],
-            $fallback
+            $event,
+            $this->beforeMagicCall,
+            $this->onMagicCall,
+            $this->afterMagicCall,
         );
     }
 
     public function __get(string $name)
     {
         $event = new MagicGetEvent($name);
-        $fallback = fn () => parent::__get($name);
 
         return $this->useMagic(
-            $event, [
-                $this->beforeGet,
-                $this->onGet,
-                $this->afterGet,
-            ],
-            $fallback
+            $event,
+            $this->beforeMagicGet,
+            $this->onMagicGet,
+            $this->afterMagicGet,
         );
     }
 
     public function __set(string $name, mixed $value)
     {
         $event = new MagicSetEvent($name, $value);
-        $fallback = fn () => parent::__set($name, $value);
 
         return $this->useMagic(
-            $event, [
-                $this->beforeSet,
-                $this->onSet,
-                $this->afterSet,
-            ],
-            $fallback
+            $event,
+            $this->beforeMagicSet,
+            $this->onMagicSet,
+            $this->afterMagicSet,
         );
     }
 
     public function __isset(string $name): bool
     {
-        return $this->onGet->has($name) || (class_parents($this) && parent::__isset($name));
+        return $this->onMagicGet->has($name) || (class_parents($this) && parent::__isset($name));
     }
 
     public function __unset(string $name): void
     {
-        if ($this->onSet->handles($name)) {
-            $this->onSet->unset($name);
+        if ($this->onMagicSet->handles($name)) {
+            $this->onMagicSet->unset($name);
         } elseif (class_parents($this)) {
             parent::__unset($name);
         }
@@ -149,36 +146,34 @@ trait Magic
       MagicEvent $event,
       EventRegistry $before,
       EventRegistry $on,
-      EventRegistry $after,
-      Closure $fallback)
+      EventRegistry $after)
     {
-        $fallback = (bool) class_parents($this::class)
-          ? $fallback
-          : fn () => throw new MagicException('No handlers found for '.$event->name);
-
         $befores = $before->find($event->name);
         $ons = $on->find($event->name);
         $afters = $after->find($event->name);
 
+        if (! $ons) {
+            $eventType = $event::class;
+            throw new MagicException("No {$eventType} handler found for {$event->name}");
+        }
+
         $handleBefore = Chain::together(...$befores)
           ->carryInput()
-          ->until(fn (MagicEvent $event) => $event->stopped)
-          ->then(fn (MagicEvent $event) => $event->getOutput());
+          ->until(fn (MagicEvent $event) => $event->stopped);
 
         $handleOn = Chain::together(...$ons)
           ->carryInput()
-          ->until(fn (MagicEvent $event) => $event->stopped)
-          ->then(fn (MagicEvent $event) => $event->getOutput());
+          ->until(fn (MagicEvent $event) => $event->stopped);
 
         $handleAfter = Chain::together(...$afters)
           ->carryInput()
           ->until(fn (MagicEvent $event) => $event->stopped);
 
-        $preparedEvent = $handleBefore($event);
-        $result = $handleOn($preparedEvent);
-        $handleAfter($result);
+        $handleBefore($event);
+        $handleOn($event);
+        $handleAfter($event);
 
-        return $result->getOutput();
+        return $event->getOutput();
     }
 
     /**
@@ -188,7 +183,7 @@ trait Magic
      */
     public function eachMagicMethod(string $attributeName, Closure $callback): void
     {
-        foreach ($this->getMagicMethods($attributeName) as [$method, $attributes]) {
+        foreach ($this->getMethodsWithAttribute($attributeName) as [$method, $attributes]) {
             foreach ($attributes as $attribute) {
                 $callback($method, $attribute->newInstance());
             }
@@ -202,48 +197,10 @@ trait Magic
      */
     public function eachMagicProperty(string $attributeName, Closure $callback): void
     {
-        foreach ($this->getMagicProperties($attributeName) as [$property, $attributes]) {
+        foreach ($this->getPropertiesWithAttribute($attributeName) as [$property, $attributes]) {
             foreach ($attributes as $attribute) {
                 $callback($property, $attribute->newInstance());
             }
         }
-    }
-
-    /**
-     * Gets the methods that have the specified attribute
-     *
-     * @return array<array{0: \ReflectionMethod, 1: array<\ReflectionAttribute>}>
-     */
-    public function getMagicMethods(string $attributeName): array
-    {
-        $reflection = new ReflectionClass($this);
-
-        return $this->collectMagicAttributes($attributeName, $reflection->getMethods());
-    }
-
-    /**
-     * Gets the properties that have the specified attribute
-     *
-     * @return array<array{0: \ReflectionProperty, 1: array<\ReflectionAttribute>}>
-     */
-    public function getMagicProperties(string $attributeName): array
-    {
-        $reflection = new ReflectionClass($this);
-
-        return $this->collectMagicAttributes($attributeName, $reflection->getProperties());
-    }
-
-    protected function collectMagicAttributes(string $attributeName, array $items): array
-    {
-        $collected = [];
-
-        foreach ($items as $item) {
-            $attributes = $item->getAttributes($attributeName);
-            if ($attributes) {
-                $collected[] = [$item, $attributes];
-            }
-        }
-
-        return $collected;
     }
 }

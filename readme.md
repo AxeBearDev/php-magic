@@ -78,7 +78,6 @@ composer require axebeardev/php-magic
 
 This base trait is a registry for all of the handlers to call when a magic method is needed. The other traits in this package use this one at their core to provide the magic functionality, but it's also available for you to use directly.
 
-
 **Important Hints**
 
 The [visibility](https://www.php.net/manual/en/language.oop5.visibility.php) of the properties and methods that you use with the `Magic` trait is important. The class members being [overloaded](https://www.php.net/manual/en/language.oop5.overloading.php) should be inaccessible, either `protected` or `private`, so that the magic methods can be called.
@@ -107,7 +106,7 @@ This class also provides the ability to set an output value that will be returne
 public __get(string $name): mixed
 ```
 
-To hook into this event, register one or more handlers using the `$this->onGet($pattern, Closure ...$handlers)` method. The closure should expect a `MagicGetEvent` instance as its parameter.
+To hook into this event, register one or more handlers using the `$this->onMagicGet($pattern, Closure ...$handlers)` method. The closure should expect a `MagicGetEvent` instance as its parameter.
 
 ### [\_\_set](https://www.php.net/manual/en/language.oop5.overloading.php#object.set)
 
@@ -118,7 +117,7 @@ To hook into this event, register one or more handlers using the `$this->onGet($
 public __set(string $name, mixed $value): void
 ```
 
-To hook into this event, register one or more handlers using the `$this->onSet($pattern, Closure ...$handlers)` method. The closure should expect a `MagicSetEvent` instance as its parameter. This event includes an additional `value` property that contains the value being set.
+To hook into this event, register one or more handlers using the `$this->onMagicSet($pattern, Closure ...$handlers)` method. The closure should expect a `MagicSetEvent` instance as its parameter. This event includes an additional `value` property that contains the value being set.
 
 ### [\_\_call](https://www.php.net/manual/en/language.oop5.overloading.php#object.call)
 
@@ -129,7 +128,7 @@ To hook into this event, register one or more handlers using the `$this->onSet($
 public __call(string $name, array $arguments): mixed
 ```
 
-To hook into this event, register one or more handlers using the `$this->onCall($pattern, Closure ...$handlers)` method. The closure should expect a `MagicCallEvent` instance as its parameter. This event includes an additional `arguments` property that contains the arguments being passed to the method.
+To hook into this event, register one or more handlers using the `$this->onMagicSet($pattern, Closure ...$handlers)` method. The closure should expect a `MagicCallEvent` instance as its parameter. This event includes an additional `arguments` property that contains the arguments being passed to the method.
 
 ### [\_\_callStatic](https://www.php.net/manual/en/language.oop5.overloading.php#object.callstatic)
 
@@ -140,7 +139,7 @@ To hook into this event, register one or more handlers using the `$this->onCall(
 public __callStatic(string $name, array $arguments): mixed
 ```
 
-To hook into this event, register one or more handlers using the `$this->onCallStatic($pattern, Closure ...$handlers)` method. The closure should expect a `MagicCallStaticEvent` instance as its parameter. This event includes an additional `arguments` property that contains the arguments being passed to the method.
+To hook into this event, register one or more handlers using the `$this->onMagicSetStatic($pattern, Closure ...$handlers)` method. The closure should expect a `MagicCallStaticEvent` instance as its parameter. This event includes an additional `arguments` property that contains the arguments being passed to the method.
 
 ---
 
@@ -151,7 +150,6 @@ This trait inspects your class documentation for `@property`, `@property-read`, 
 ## Basic Usage
 
 At its simplest when you include `@property` tags in your class documentation, the `MagicProperties` trait will add a getter and setter for the property.
-
 
 If there the class includes a protected or private property of the same name, it will be used as the backing storage for the property. If there is not property with the name, the values will be stored in an `unboundProperties` array defined in the trait.
 
@@ -176,7 +174,7 @@ echo $model->count; // 5
 
 // Simple type coercion is applied based on the type hint in the property tag.
 $model->count = '6';
-echo $model->count; // 6 
+echo $model->count; // 6
 ```
 
 ## Read-Only and Write-Only Properties
