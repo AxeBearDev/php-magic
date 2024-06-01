@@ -74,7 +74,15 @@ composer require axebeardev/php-magic
 
 ---
 
-# Magic
+# Getting Started
+
+## `AxeBear\Magic\Traits\MagicProperties`
+
+## `AxeBear\Magic\Traits\OverloadedMethods`
+
+## `AxeBear\Magic\Traits\TrackChanges`
+
+## `AxeBear\Magic\Traits\Magic`
 
 This base trait is a registry for all of the handlers to call when a magic method is needed. The other traits in this package use this one at their core to provide the magic functionality, but it's also available for you to use directly.
 
@@ -99,7 +107,7 @@ This class also provides the ability to set an output value that will be returne
 
 ### [\_\_get](https://www.php.net/manual/en/language.oop5.overloading.php#object.get)
 
-- Listener: `onGet(string $name, Closure ...$handlers): static`
+- Listener: `onMagicGet(string $name, Closure ...$handlers): static`
 - Event: `MagicGetEvent`
 
 ```php
@@ -110,7 +118,7 @@ To hook into this event, register one or more handlers using the `$this->onMagic
 
 ### [\_\_set](https://www.php.net/manual/en/language.oop5.overloading.php#object.set)
 
-- Listener: `onSet(string $name, Closure ...$handlers): static`
+- Listener: `onMagicSet(string $name, Closure ...$handlers): static`
 - Event: `MagicSetEvent`
 
 ```php
@@ -121,7 +129,7 @@ To hook into this event, register one or more handlers using the `$this->onMagic
 
 ### [\_\_call](https://www.php.net/manual/en/language.oop5.overloading.php#object.call)
 
-- Listener: `onCall(string $name, Closure ...$handlers): static`
+- Listener: `onMagicCall(string $name, Closure ...$handlers): static`
 - Event: `MagicCallEvent`
 
 ```php
@@ -129,17 +137,6 @@ public __call(string $name, array $arguments): mixed
 ```
 
 To hook into this event, register one or more handlers using the `$this->onMagicSet($pattern, Closure ...$handlers)` method. The closure should expect a `MagicCallEvent` instance as its parameter. This event includes an additional `arguments` property that contains the arguments being passed to the method.
-
-### [\_\_callStatic](https://www.php.net/manual/en/language.oop5.overloading.php#object.callstatic)
-
-- Listener: `onCallStatic(string $name, Closure ...$handlers): void`
-- Event: `MagicCallStaticEvent`
-
-```php
-public __callStatic(string $name, array $arguments): mixed
-```
-
-To hook into this event, register one or more handlers using the `$this->onMagicSetStatic($pattern, Closure ...$handlers)` method. The closure should expect a `MagicCallStaticEvent` instance as its parameter. This event includes an additional `arguments` property that contains the arguments being passed to the method.
 
 ---
 
