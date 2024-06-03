@@ -8,9 +8,11 @@ use AxeBear\Magic\Events\MagicCallEvent;
 use AxeBear\Magic\Events\MagicGetEvent;
 use AxeBear\Magic\Events\MagicSetEvent;
 use AxeBear\Magic\Exceptions\MagicException;
+use AxeBear\Magic\Support\Types\TypeConverter;
 use Closure;
 use InvalidArgumentException;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagNode;
+use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionParameter;
@@ -18,7 +20,7 @@ use ReflectionProperty;
 
 trait MagicProperties
 {
-    use Boots, Magic, MakesClosures, ParsesDocs;
+    use Boots, Magic, MakesClosures, ParsesDocs, Reflections;
 
     private array $propertyCache = [];
 
@@ -134,7 +136,7 @@ trait MagicProperties
     protected function registerUnboundProperty(PhpDocTagNode $tag, MagicProperty $config)
     {
         $name = ltrim($tag->value->propertyName, '$');
-        $type = $tag->value->type?->name ?? null;
+        $type = $tag->value->type ?? null;
 
         if ($config->readable()) {
             $this->registerUnboundGetter($name, $config);
@@ -156,28 +158,19 @@ trait MagicProperties
         );
     }
 
-    protected function registerUnboundSetter(string $name, MagicProperty $config, ?string $type)
+    protected function registerUnboundSetter(string $name, MagicProperty $config, ?IdentifierTypeNode $type)
     {
         $this->onMagicSet(
             $name,
             function (MagicSetEvent $event) use ($name, $type, $config) {
                 $newValue = $this->valueAfterTransforms($event->value, $config->onSet);
-                if ($type && gettype($newValue) !== $type) {
-                    $newValue = $this->coerceType($newValue, $type);
+                if ($type && ! $config->strictTyping) {
+                    $newValue = TypeConverter::convert($type->name, $newValue);
                 }
                 $this->unboundProperties[$name] = $newValue;
                 $event->setOutput($newValue);
             }
         );
-    }
-
-    public function coerceType(mixed $value, string $type): mixed
-    {
-        if (! settype($value, $type)) {
-            throw new InvalidArgumentException('Could not coerce value to type '.$type);
-        }
-
-        return $value;
     }
 
     protected function registerClassProperties()
@@ -299,12 +292,14 @@ trait MagicProperties
     {
         $name = $param->getName();
 
-        if (method_exists($this, $name) || $this->onMagicCall->handles($name)) {
-            return $this->{$name}();
-        }
-
+        // Prefer properties first, in case there's a calculated property
         if (property_exists($this, $name) || $this->onMagicGet->handles($name)) {
             return $this->{$name};
+        }
+
+        // Then try basic methods
+        if (method_exists($this, $name) || $this->onMagicCall->handles($name)) {
+            return $this->{$name}();
         }
 
         throw new MagicException('Could not find class member '.$name.' for use as a parameter');

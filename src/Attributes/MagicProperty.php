@@ -26,13 +26,15 @@ class MagicProperty
      * @param  fn (MagicGetEvent): void[]  $onGet The list of event handlers to call before the property is accessed.
      * @param  bool  $disableCache Disables caching if this is a method.
      * @param  int  $access The access level of the property (READ, WRITE, READ_WRITE).
+     * @param  bool  $strictTyping Whether or not to enforce strict typing. If true, the property will only accept values of the same type as the default value. Otherwise, basic type coercion will be applied.
      */
     public function __construct(
       public array $aliases = [],
       public array $onSet = [],
       public array $onGet = [],
       public bool $disableCache = false,
-      public int $access = self::READ_WRITE
+      public int $access = self::READ_WRITE,
+      public bool $strictTyping = false,
     ) {
     }
 
