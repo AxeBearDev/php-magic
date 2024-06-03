@@ -11,12 +11,15 @@ use InvalidArgumentException;
  */
 class TypeConverter implements ConvertsType
 {
+    /**
+     * The registered converters. Order matters. The first supported converter will be used.
+     */
     protected static array $converters = [
         BuiltinConverter::class,
-        ClassConverter::class,
         IntRangeConverter::class,
         TypedArrayConverter::class,
         MixedConverter::class,
+        ClassConverter::class,
     ];
 
     public static function append(string $converter): void
