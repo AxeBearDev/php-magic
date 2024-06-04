@@ -15,10 +15,10 @@ class TypeConverter implements ConvertsType
      * The registered converters. Order matters. The first supported converter will be used.
      */
     protected static array $converters = [
+        MixedConverter::class,
         BuiltinConverter::class,
         IntRangeConverter::class,
         TypedArrayConverter::class,
-        MixedConverter::class,
         ClassConverter::class,
     ];
 
@@ -32,23 +32,26 @@ class TypeConverter implements ConvertsType
         array_unshift(self::$converters, $converter);
     }
 
-    public static function supports(string $type): bool
+    protected static function converterForType(string $type): ?string
     {
         foreach (self::$converters as $converter) {
             if ($converter::supports($type)) {
-                return true;
+                return $converter;
             }
         }
 
-        return false;
+        return null;
+    }
+
+    public static function supports(string $type): bool
+    {
+        return (bool) self::converterForType($type);
     }
 
     public static function convert(string $type, mixed $value, mixed $default = null): mixed
     {
-        foreach (self::$converters as $converter) {
-            if ($converter::supports($type)) {
-                return $converter::convert($type, $value, $default);
-            }
+        if ($converter = self::converterForType($type)) {
+            return $converter::convert($type, $value, $default);
         }
 
         throw new InvalidArgumentException('Unsupported type: '.$type);
