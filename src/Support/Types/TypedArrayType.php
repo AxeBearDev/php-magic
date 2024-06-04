@@ -62,7 +62,6 @@ class TypedArrayType
     {
         // Remove the key type, if present, and return the rest
         $valueType = trim(preg_replace('/^(\w+),/', '', $wrappedType));
-        echo "valueType: $valueType for wrappedType: $wrappedType and fullType: {$this->fullType}\n";
 
         return strlen($valueType) ? $valueType : false;
     }
