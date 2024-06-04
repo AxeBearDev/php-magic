@@ -35,6 +35,26 @@ test('non-empty-array', function () {
     expect(fn () => tested::cast($type, $input))->toThrow(\OutOfRangeException::class);
 });
 
+describe('nested arrays', function () {
+    test('array<array<string>>', function () {
+        $input = [['1', 2], [3.3, true], [false, null]];
+        $output = [['1', '2'], ['3.3', '1'], ['', '']];
+        $type = 'array<array<string>>';
+        expect(tested::supports($type))->toBeTrue();
+        $converted = tested::cast($type, $input);
+        expect($converted)->toBe($output);
+    });
+
+    test('array<string, array<string>>', function () {
+        $input = ['a' => ['1', 2], 'b' => [3.3, true], 'c' => [false, null]];
+        $output = ['a' => ['1', '2'], 'b' => ['3.3', '1'], 'c' => ['', '']];
+        $type = 'array<string, array<string>>';
+        expect(tested::supports($type))->toBeTrue();
+        $converted = tested::cast($type, $input);
+        expect($converted)->toBe($output);
+    });
+});
+
 foreach ($expectations as $type => $data) {
     [$input, $output] = $data;
 

@@ -6,7 +6,7 @@ class MixedCaster implements CastsTypes
 {
     public static function supports(string $type): bool
     {
-        return $type === 'mixed';
+        return $type === 'mixed' || $type === '';
     }
 
     public static function cast(string $type, mixed $value): mixed
