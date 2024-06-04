@@ -2,14 +2,14 @@
 
 namespace AxeBear\Magic\Support\Types;
 
-class ClassConverter implements ConvertsType
+class ClassCaster implements CastsTypes
 {
     public static function supports(string $type): bool
     {
         return class_exists($type);
     }
 
-    public static function convert(string $type, mixed $value): mixed
+    public static function cast(string $type, mixed $value): mixed
     {
         if (! class_exists($type)) {
             throw new \InvalidArgumentException("Class does not exist: {$type}");

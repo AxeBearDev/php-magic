@@ -8,7 +8,7 @@ use AxeBear\Magic\Events\MagicCallEvent;
 use AxeBear\Magic\Events\MagicGetEvent;
 use AxeBear\Magic\Events\MagicSetEvent;
 use AxeBear\Magic\Exceptions\MagicException;
-use AxeBear\Magic\Support\Types\TypeConverter;
+use AxeBear\Magic\Support\Types\TypeCaster;
 use Closure;
 use InvalidArgumentException;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagNode;
@@ -165,7 +165,7 @@ trait MagicProperties
             function (MagicSetEvent $event) use ($name, $type, $config) {
                 $newValue = $this->valueAfterTransforms($event->value, $config->onSet);
                 if ($type && ! $config->strictTyping) {
-                    $newValue = TypeConverter::convert($type->name, $newValue);
+                    $newValue = TypeCaster::cast($type->name, $newValue);
                 }
                 $this->unboundProperties[$name] = $newValue;
                 $event->setOutput($newValue);

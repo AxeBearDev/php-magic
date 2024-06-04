@@ -2,7 +2,7 @@
 
 namespace AxeBear\Magic\Support\Types;
 
-class BuiltinConverter implements ConvertsType
+class BuiltinCaster implements CastsTypes
 {
     public static array $supported = [
         'bool',
@@ -22,7 +22,7 @@ class BuiltinConverter implements ConvertsType
         return in_array($type, self::$supported);
     }
 
-    public static function convert(string $type, mixed $value): mixed
+    public static function cast(string $type, mixed $value): mixed
     {
         if (! settype($value, $type)) {
             throw new \InvalidArgumentException("Value cannot covert to {$type} type.");

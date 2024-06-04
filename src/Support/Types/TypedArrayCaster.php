@@ -14,14 +14,14 @@ namespace AxeBear\Magic\Support\Types;
  * Collection<Type>
  * Collection<int, Type>
  */
-class TypedArrayConverter implements ConvertsType
+class TypedArrayCaster implements CastsTypes
 {
     public static function supports(string $type): bool
     {
         return (new TypedArrayType($type))->valid;
     }
 
-    public static function convert(string $type, mixed $value): mixed
+    public static function cast(string $type, mixed $value): mixed
     {
         if (! settype($value, 'array')) {
             throw new \InvalidArgumentException('Value is not an array');
@@ -40,8 +40,8 @@ class TypedArrayConverter implements ConvertsType
         $converted = [];
 
         foreach ($value as $key => $item) {
-            $convertedKey = TypeConverter::convert($type->keyType, $key);
-            $convertedItem = TypeConverter::convert($type->valueType, $item);
+            $convertedKey = TypeCaster::cast($type->keyType, $key);
+            $convertedItem = TypeCaster::cast($type->valueType, $item);
             $converted[$convertedKey] = $convertedItem;
         }
 

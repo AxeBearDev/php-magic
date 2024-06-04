@@ -1,6 +1,6 @@
 <?php
 
-use AxeBear\Magic\Support\Types\TypedArrayConverter as tested;
+use AxeBear\Magic\Support\Types\TypedArrayCaster as tested;
 
 $expectations = [
     'int' => [
@@ -26,13 +26,13 @@ test('non-empty-array', function () {
     $output = [1, 2, 3];
     $type = 'non-empty-array<int>';
     expect(tested::supports($type))->toBeTrue();
-    $converted = tested::convert($type, $input);
+    $converted = tested::cast($type, $input);
     expect($converted)->toBe($output);
 
     $input = [];
     $type = 'non-empty-array<int>';
     expect(tested::supports($type))->toBeTrue();
-    expect(fn () => tested::convert($type, $input))->toThrow(\OutOfRangeException::class);
+    expect(fn () => tested::cast($type, $input))->toThrow(\OutOfRangeException::class);
 });
 
 foreach ($expectations as $type => $data) {
@@ -52,7 +52,7 @@ foreach ($expectations as $type => $data) {
     foreach ($variants as $variant) {
         test($variant, function () use ($variant, $input, $output) {
             expect(tested::supports($variant))->toBeTrue();
-            $converted = tested::convert($variant, $input);
+            $converted = tested::cast($variant, $input);
             expect($converted)->toBe($output);
         });
     }

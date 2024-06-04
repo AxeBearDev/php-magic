@@ -2,10 +2,10 @@
 
 namespace AxeBear\Magic\Support\Types;
 
-interface ConvertsType
+interface CastsTypes
 {
     /**
-     * Does this converter support the provided type?
+     * Does this caster support the provided type?
      */
     public static function supports(string $type): bool;
 
@@ -16,5 +16,5 @@ interface ConvertsType
      *
      * @throws \InvalidArgumentException|\OutOfRangeException
      */
-    public static function convert(string $type, mixed $value): mixed;
+    public static function cast(string $type, mixed $value): mixed;
 }

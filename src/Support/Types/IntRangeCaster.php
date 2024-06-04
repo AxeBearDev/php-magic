@@ -14,7 +14,7 @@ namespace AxeBear\Magic\Support\Types;
  * int<min, 100>
  * int<50, max>
  */
-class IntRangeConverter implements ConvertsType
+class IntRangeCaster implements CastsTypes
 {
     protected static string $rangePattern = '/^int<(\d+|min), (\d+|max)>$/';
 
@@ -29,7 +29,7 @@ class IntRangeConverter implements ConvertsType
         ]) || preg_match(self::$rangePattern, $type);
     }
 
-    public static function convert(string $type, mixed $value): mixed
+    public static function cast(string $type, mixed $value): mixed
     {
         $int = (int) $value;
         $min = PHP_INT_MIN;
