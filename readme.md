@@ -76,7 +76,18 @@ composer require axebeardev/php-magic
 
 # Getting Started
 
-## `AxeBear\Magic\Traits\MagicProperties`
+## MagicProperties
+
+The `MagicProperties` trait inspects your class documentation for `@property`, `@property-read`, and `@property-write` tags and adds the corresponding magic methods to your class so that those properties work. You can optionally add configuration to any of the properties with the `#[MagicProperty]` attribute.
+
+**Calculated Properties**
+You may provide a backing protected or private method for a `@property-read` property. If you do, that method will be used as the getter for the property. This allows you to create calculated properties. Named parameters for this method are mapped to properties of the class, and the output is cached.
+
+**Type Coercion**
+Simple type coercion is applied based on the type hint in the property tag. Most [PHPDoc Types that PHPStan supports](https://phpstan.org/writing-php-code/phpdoc-types) are automatically cast for you. If a type isn't supported, you can add custom type coercion by adding a `#[MagicProperty]` attribute to the property and defining `onSet` and `onGet` methods.
+
+**Fluent Getters and Setters**
+In addition to mapping properties, you can also create magic getter and setter methods using the `@method` tag in your class documentation. This allows you to provide a fluent interface for your class so that you can chain multiple setter calls together.
 
 ## `AxeBear\Magic\Traits\OverloadedMethods`
 
@@ -261,9 +272,9 @@ echo $model->getRawValue('message'); // ZXJuc3Q=
 
 ## Fluent Getters and Setters
 
-In addition to mapping properties, you can also create magic getter and setter methods using the `@method` tag in your class documentation. This is useful when you want to provide a fluent interface for your class. The `MapDocBlock` trait will automatically add the magic methods to your class when it sees the `@method` tag with either zero or one parameters.
+In addition to mapping properties, you can also create magic getter and setter methods using the `@method` tag in your class documentation. This is useful when you want to provide a fluent interface for your class. The `MagicProperties` trait will automatically add the magic methods to your class when it sees the `@method` tag with either zero or one parameters.
 
-If the `@method` tag includes one parameter, the `MapDocBlock` trait will add a setter method. If the `@method` tag includes zero parameters, the `MapDocBlock` trait will add a getter method.
+If the `@method` tag includes one parameter, the `MagicProperties` trait will add a setter method. If the `@method` tag includes zero parameters, the `MagicProperties` trait will add a getter method.
 
 ```php
 /**
