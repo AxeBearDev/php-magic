@@ -64,7 +64,7 @@ echo $model->repeatedName; // BearBear
 ## Installation
 
 ```bash
-composer require axebeardev/php-magic
+composer require axebear/php-magic
 ```
 
 ## Scripts
