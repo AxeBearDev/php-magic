@@ -9,7 +9,31 @@ This PHP package provides utilities for adding magic properties and methods to y
 - Transformed properties, on set or get, with the `#[MagicProperty]` attribute.
 - Full access to add more custom handlers using the `Magic` trait.
 
-Check it out. It's magic!
+## Motivation
+
+I have a love-hate relationship with magic methods in PHP. You can build some impressive things using dynamically handled properties and methods, but it can also be opaque and hard to debug without being disciplined about adding documentation. This package aims to make magic methods more transparent and easier by using PHP's built-in reflection capabilities and docblocks to define class behaviors.
+
+**A Simple Example**
+
+```php
+use AxeBear\Magic\Traits\MagicProperties;
+
+/**
+ * This example class shows how class comments
+ *
+ * @property-read int $count Gets the count.
+ * @method self count(int $count) Updates the count.
+ */
+class Counter {
+  use MagicProperties;
+}
+
+$counter = new Counter();
+$counter->count(5);
+echo $counter->count; // 5
+```
+
+**But wait. There's more.**
 
 ```php
 use AxeBear\Magic\Traits\MagicProperties;
@@ -17,8 +41,7 @@ use AxeBear\Magic\Traits\OverloadedMethods;
 use AxeBear\Magic\Attributes\Overloaded;
 
 /**
- * This example class shows how class comments
- * can be used to define magic properties and methods.
+ * This example shows magic properties, calculated properties, magic methods, and overloaded methods.
  *
  * @property string $name
  * @method self name(string $name)
@@ -26,7 +49,7 @@ use AxeBear\Magic\Attributes\Overloaded;
  * @property int $count
  * @method self count(int $count)
  *
- * @property string $repeatedName
+ * @property string $repeatedName  This is a calculated property that depends on name and count.
  *
  * @method void update(...$args)
  */
@@ -59,6 +82,9 @@ echo $model->name; // Bear
 echo $model->count; // 2
 echo $model->repeatedName; // BearBear
 
+$model->count('1'); // Type coercion comes for free (mostly!)
+echo $model->count; // 1
+
 ```
 
 ## Installation
@@ -88,6 +114,8 @@ Simple type coercion is applied based on the type hint in the property tag. Most
 
 **Fluent Getters and Setters**
 In addition to mapping properties, you can also create magic getter and setter methods using the `@method` tag in your class documentation. This allows you to provide a fluent interface for your class so that you can chain multiple setter calls together.
+
+# Digging Deeper
 
 ## `AxeBear\Magic\Traits\OverloadedMethods`
 
