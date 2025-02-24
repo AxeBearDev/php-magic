@@ -19,7 +19,8 @@ I have a love-hate relationship with magic methods in PHP. You can build some im
 use AxeBear\Magic\Traits\MagicProperties;
 
 /**
- * This example class shows how class comments
+ * This example class shows how a class comment
+ * can be used to define a magic property and method.
  *
  * @property-read int $count Gets the count.
  * @method self count(int $count) Updates the count.
