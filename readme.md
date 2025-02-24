@@ -52,7 +52,8 @@ use AxeBear\Magic\Attributes\Overloaded;
  *
  * @property string $repeatedName  This is a calculated property that depends on name and count.
  *
- * @method void update(...$args)
+ * @method void update(array $data) Updates the properties from an array.
+ * @method void update(string $name, int $count) Updates the properties from values.
  */
 class Model {
   use MagicProperties;
@@ -117,10 +118,6 @@ Simple type coercion is applied based on the type hint in the property tag. Most
 In addition to mapping properties, you can also create magic getter and setter methods using the `@method` tag in your class documentation. This allows you to provide a fluent interface for your class so that you can chain multiple setter calls together.
 
 # Digging Deeper
-
-## `AxeBear\Magic\Traits\OverloadedMethods`
-
-## `AxeBear\Magic\Traits\TrackChanges`
 
 ## `AxeBear\Magic\Traits\Magic`
 
@@ -365,7 +362,9 @@ use AxeBear\Magic\Attributes\Overloaded;
 use AxeBear\Magic\Traits\OverloadedMethods;
 
 /**
- * @method string find(...$args)
+ * @method string find(int $id) Finds by id.
+ * @method string find(string $slug) Finds by slug.
+ * @method string find(string $slug, int $id) Finds by slug and id.
  */
 class Model {
   use OverloadedMethods;

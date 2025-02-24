@@ -225,9 +225,9 @@ class Arr
      * Returns the first value. If a test is provided, it returns the first value that passes the test.
      */
     public static function first(
-      Closure $test = null,
-      mixed $default = null,
-      bool $preserveKeys = false
+        ?Closure $test = null,
+        mixed $default = null,
+        ?bool $preserveKeys = false
     ): Closure {
         return function ($array) use ($test, $default, $preserveKeys) {
             $copy = [...$array];

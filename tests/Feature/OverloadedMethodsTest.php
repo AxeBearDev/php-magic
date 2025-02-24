@@ -6,15 +6,19 @@ use AxeBear\Magic\Traits\OverloadedMethods;
 class OverloadedModelItem
 {
     public function __construct(
-      public string $name,
-      public int $age,
-      public float $value,
-    ) {
-    }
+        public string $name,
+        public int $age,
+        public float $value,
+    ) {}
 }
 
 /**
  * @method array find(...$args)
+ * @method array find(int $age, ?OverloadedModelItem $default = null) findByAge
+ * @method array find(string $name, ?OverloadedModelItem $default = null) findByName
+ * @method array find(string $key, int|string $value, ?OverloadedModelItem $default = null) findByKey
+ * @method array find(string $name, int $age, float $value, ?OverloadedModelItem $default = null) findByAll
+ * @method array find(string $name, int $age, float $value, ?OverloadedModelItem $default = null) findByAllDuplicate
  */
 class OverloadedModel
 {
@@ -48,7 +52,7 @@ class OverloadedModel
     public function findByKey(string $key, int|string $value, ?OverloadedModelItem $default = null)
     {
         foreach ($this->items as $item) {
-            if ($item->$key === $value) {
+            if ($value === $item->$key) {
                 return $item;
             }
         }
@@ -77,60 +81,60 @@ class OverloadedModel
 
 describe('OverloadedMethods', function () {
     test('find exists', function () {
-        $model = new OverloadedModel();
+        $model = new OverloadedModel;
         expect($model->onMagicCall->handles('find'))->toBeTrue();
     });
 
     test('find by age', function () {
-        $model = new OverloadedModel();
+        $model = new OverloadedModel;
         $result = $model->find(25);
         $expected = $model->findByAge(25);
         expect($result)->toBe($expected);
     });
 
     test('find by age with default', function () {
-        $model = new OverloadedModel();
+        $model = new OverloadedModel;
         $defaultValue = new OverloadedModelItem('Default', 0, 0.0);
         $result = $model->find(1, $defaultValue);
         expect($result)->toBe($defaultValue);
     });
 
     test('find by name', function () {
-        $model = new OverloadedModel();
+        $model = new OverloadedModel;
         $result = $model->find('Blue');
         $expected = $model->findByName('Blue');
         expect($result)->toBe($expected);
     });
 
     test('find by name with default', function () {
-        $model = new OverloadedModel();
+        $model = new OverloadedModel;
         $defaultValue = new OverloadedModelItem('Default', 0, 0.0);
         $result = $model->find('Unknown', $defaultValue);
         expect($result)->toBe($defaultValue);
     });
 
     test('find by key', function () {
-        $model = new OverloadedModel();
+        $model = new OverloadedModel;
         $result = $model->find('name', 'Blue');
         $expected = $model->findByKey('name', 'Blue');
         expect($result)->toBe($expected);
     });
 
     test('find by key with default', function () {
-        $model = new OverloadedModel();
+        $model = new OverloadedModel;
         $defaultValue = new OverloadedModelItem('Default', 0, 0.0);
         $result = $model->find('name', 'Unknown', $defaultValue);
         expect($result)->toBe($defaultValue);
     });
 
     test('error on no matches', function () {
-        $model = new OverloadedModel();
+        $model = new OverloadedModel;
         $closure = fn () => $model->find(1, 2, 3, 4);
         expect($closure)->toThrow(BadMethodCallException::class);
     });
 
     test('error on multiple matches', function () {
-        $model = new OverloadedModel();
+        $model = new OverloadedModel;
         $closure = fn () => $model->find('name', 10, 1.2, null);
         expect($closure)->toThrow(BadMethodCallException::class);
     });
